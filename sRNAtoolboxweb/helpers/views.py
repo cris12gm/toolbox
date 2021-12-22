@@ -307,7 +307,7 @@ def result_Fasubset(request):
             for line in fd:
                 if "Filtered fastafile" in line:
                     value = line.replace("\n", "").split(",")[-1]
-                    backvalue = value
+                    backvalue = value.split("/")[-1]
                 if "File: ID mappings" in line:
                     mappings = line.replace("\n", "").split(",")[-1]
                 if "ERROR" in line:
