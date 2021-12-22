@@ -254,15 +254,17 @@ def result(request):
         new_record = JobStatus.objects.get(pipeline_key=job_id)
         assert isinstance(new_record, JobStatus)
 
-        # check if fasubset and redirect to its results
-        if 'h_fasubset' in new_record.job_name:
-          print (job_id)
-          return redirect(reverse_lazy('result_Fasubset') + '?id=' + job_id)      
-          #return redirect(reverse_lazy('result_Fasubset', kwargs={"id": job_id}))
+
             
         results = {}
         results["jobID"]=new_record.pipeline_key
         if new_record.job_status == "Finished":
+            # check if fasubset and redirect to its results
+            if 'h_fasubset' in new_record.job_name:
+                print(job_id)
+                return redirect(reverse_lazy('result_Fasubset') + '?id=' + job_id)
+                # return redirect(reverse_lazy('result_Fasubset', kwargs={"id": job_id}))
+
             fd = open(os.path.join(new_record.outdir, "logFile.txt"))
             backvalue = "result"
             info_string = ""
@@ -301,14 +303,14 @@ def result_Fasubset(request):
             fd = open(os.path.join(new_record.outdir, "log.txt"))
             backvalue = "result"
             info_string = ""
+            mappings = ""
             for line in fd:
                 if "Filtered fastafile" in line:
-                  value = line.replace("\n", "").split(",")[-1]
-                  backvalue = value
+                    value = line.replace("\n", "").split(",")[-1]
+                    backvalue = value
                 if "File: ID mappings" in line:
-                  mappings = line.replace("\n", "").split(",")[-1]
+                    mappings = line.replace("\n", "").split(",")[-1]
                 if "ERROR" in line:
-                    jumpline = line + "\n"
                     info_string += line
 #            zip_file = os.path.join(backvalue + ".zip").split("/")[-1]
  #           if os.path.exists(backvalue+".zip"):
