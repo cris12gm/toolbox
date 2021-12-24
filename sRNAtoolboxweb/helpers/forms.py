@@ -695,9 +695,9 @@ class FasubsetForm(forms.Form):
         }
         with open(config_location, "w+") as file:
             file.write("mode=FASTASUB\n")
-            file.write("inputList=" + os.path.join(out_dir, listfile) + "\n")
-            file.write("inputFasta=" + os.path.join(out_dir, ifile) + "\n")
-            file.write("outBase=" + out_dir + "\n")
+            file.write("list=" + os.path.join(out_dir, listfile) + "\n")
+            file.write("input=" + os.path.join(out_dir, ifile) + "\n")
+            file.write("output=" + out_dir + "/\n")
 
         import json
         configuration_file_path = os.path.join(out_dir, 'conf.json')
