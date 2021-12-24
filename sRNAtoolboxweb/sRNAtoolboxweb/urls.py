@@ -20,6 +20,7 @@ urlpatterns =[
     url(r'^mirnafunctargets', include('miRNAfuncTargets.urls')),
     url(r'^multibench', include('multibench.urls')),
     url(r'^helper/', include('helpers.urls')),
+    url(r'^srnacons/', include('sRNAcons.urls')),
     url(r'^blank$', views.blank),
     url(r'^index', views.index),
     url(r'^manual', views.manual),

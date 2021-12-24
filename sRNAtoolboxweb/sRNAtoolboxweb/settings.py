@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+DEBUG=True
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from django.core.files.storage import FileSystemStorage
 
@@ -24,12 +25,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '^qn#c))1g9tb103+q4@04gk^**9#@6=kp(i4lz%$ron%yumut='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["bioinfo5.ugr.es",
-		"127.0.0.1"]
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
+
+
+#these are test settings 
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     'sRNAfuncTerms',
     'progress',
     'sRNAde',
+    'multibench',
     'helpers',
     'sRNABench',
     'sRNAblast',
@@ -53,6 +57,10 @@ INSTALLED_APPS = [
     'sRNAgFree',
     'django_tables2',
     'dajax',
+    
+    'multi',
+    'miRNAgFree',
+    'sRNAcons',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +70,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+   # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'sRNAtoolboxweb.urls'
@@ -113,11 +121,14 @@ CORS_ALLOW_METHODS = (
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
+
+DATABASES = { 
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+       'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': {
+            'read_default_file': '/opt/sRNAtoolbox_prod/sRNAtoolboxweb/sRNAtoolboxweb/my.cnf',
+        },  
+    }   
 }
 
 FS = FileSystemStorage("/shared/sRNAtoolbox/webData")
@@ -160,10 +171,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-# SUB_SITE = ''
+#SUB_SITE = ''
 SUB_SITE = '/srnatoolbox'
 STATIC_URL = SUB_SITE + '/static/'
 MEDIA_URL = SUB_SITE + '/media/'
+
+APPEND_SLASH = False
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'sRNAtoolboxweb', 'static'),
@@ -191,6 +204,7 @@ CONF = {
     "species": "/opt/sRNAtoolboxDB/species.txt",
     #"speciesAnnotation": "/home/aruedamartin/annotation.txt",
     "mirDbPath" : "/opt/sRNAtoolboxDB/mirdb.tsv",
+    "MirGeneDB_data" : "/opt/sRNAtoolboxDB/miRGeneDB.tsv",
     "speciesAnnotation": "/opt/sRNAtoolboxDB/annotation.txt",
     "targetAnnotation": "/shared/sRNAtoolboxDB/targetAnnot.txt",
     "db": "/opt/sRNAtoolboxDB",
@@ -202,6 +216,13 @@ CONF = {
 
 QSUB = True
 
+MANUAL_URL = os.path.join(STATIC_URL, "webmanual.pdf")
+
 SETTINGS_EXPORT = [
-    'SUB_SITE'
+    'SUB_SITE',
+    'MANUAL_URL',
+    'STATIC_URL'
 ]
+
+BENCH_PLOTLY = "/opt/sRNAtoolbox_prod/sRNAtoolboxweb/sRNABench/bench_plots_gen.py"
+PATH_TO_VENV = "/opt/venv/sRNAtoolbox2019/bin/"
