@@ -124,7 +124,7 @@ def result(request):
                 except:
                     pass
             else:
-                results["error"] = "Some errors were detected, please write with the number of this jobID ("+job_id+") to the administrator of the website."
+                results["error"] = "Some errors were detected, please email with the number of this jobID ("+job_id+") to the administrator of the website."
             return render(request, 'sRNAcons/srnacons_result.html', results)
         else:
             return redirect(reverse_lazy('progress', kwargs={"pipeline_id": job_id}))
