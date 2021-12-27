@@ -7,7 +7,7 @@
             <div class="col-lg-12">
                 <div class="page-header">
                     <h1>sRNAcons: </h1>
-                    <h3>Take a fasta file with small RNAs and map them to the genomes in the sRNAtoolboxDB</h3>
+                    <h3>Mapping of small RNA sequences to all genomes in sRNAtoolbox</h3>
                 </div>
             </div>
 
@@ -18,9 +18,7 @@
         <div class="row">
             <div class="col-lg-9">
 
-
                 {% include 'form_base.html' %}
-
 
             </div>
 
@@ -35,8 +33,6 @@
                     <div class="panel-body">
                         <a href="{{ settings.MANUAL_URL }}" target="_blank">Link to Web Manual</a>
                         <br>
-                        <a href="https://arn.ugr.es/srnatoolbox/srnade/result?id=R5IQEZ8KUGFX9TY" target="_blank">Link
-                            to Test Data Results</a>
                     </div>
                 </div>
 
@@ -59,23 +55,6 @@
 
 
 {% block js %}
-{#    <script src="{% static 'js/sRNAde_form_control.js' %}">#}
-
-    <script>
-
-    $("input[type=file]").on('change',function(){
-    var extensions = ["xls","xlsx","doc","docx","XLSX","XLS","DOC","DOCX"]
-    if (extensions.includes(this.files[0].name.split('.').pop()) ){
-        alert('Spread-sheet or document extensions such as ".xls" or ".doc" are not supported. Please upload a different file. ')
-        document.getElementById('id_ifile').value = "";
-    }
-
-{#    filename.split('.').pop();#}
-});
-
-
-    </script>
-
     <script>
     function loadParams() {
         $('a[href="#use-group-string-advanced"]').tab('show');
@@ -84,8 +63,6 @@
         document.getElementById("id_sampleGroupsNot").value= "exosome#cell";
         return true   // The function returns the product of p1 and p2
     }
-
-
     </script>
 
 {% endblock %}

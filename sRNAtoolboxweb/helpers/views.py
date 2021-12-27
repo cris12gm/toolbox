@@ -1,6 +1,7 @@
 # Create your views here.
 import os
 import urllib
+import ssl
 
 from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse_lazy
@@ -13,6 +14,7 @@ from progress.models import JobStatus
 from utils import pipeline_utils
 from utils.sysUtils import make_dir
 from django.conf import settings
+
 
 
 FS = FileSystemStorage("/shared/sRNAtoolbox/webData")
@@ -233,6 +235,7 @@ def run(request, tool):
                 url_input = request.POST["url"]
                 dest = os.path.join(FS.location, os.path.basename(url_input))
                 handler = urllib.URLopener()
+                ssl._create_default_https_context = ssl._create_unverified_context
                 handler.retrieve(url_input, dest)
                 ifile = dest
             except:

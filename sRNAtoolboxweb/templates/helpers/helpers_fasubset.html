@@ -19,8 +19,10 @@
 
                     <div class="well">
                         <h4>Fasta Subsetter:</h4>
-                        <p>Description
+                        <p>
+                            This tool takes an input list and a fasta file and extract the list entries from the fasta file. If identical sequences do exist in the fasta, only one entry is chosen by chance but a mapping file is provided with the IDs of the identical sequences.
                         </p>
+
 
                         <p><button type="button" class="btn btn-primary center-block" onclick="loadParams()">Load test Data</button>
                         </p>
@@ -65,7 +67,7 @@
     </script>
     <script>
         function loadParams() {
-            document.getElementById("id_url").value= "https://www.arn.ugr.es/testFiles/fasubsetTest.fa";
+            document.getElementById("id_url").value= "https://arn.ugr.es/testFiles/fasubsetTest.fa";
             document.getElementById("id_faids").value= "seqA\nseqC";
             return true   // The function returns the product of p1 and p2
          }

@@ -97,26 +97,34 @@ def result(request):
         results = {}
         results["id"] = job_id
         if new_record.job_status == "Finished":
-            results["info"] = "correct"
+            results["info"] = "Correct"
             results["date"] = new_record.start_time + datetime.timedelta(days=15)
+
             try:
-                parser = sRNAconsParser(os.path.join(new_record.outdir, "sRNA2Species.txt"), "srna2species", 500)
-                srna2sp = [obj for obj in parser.parse()]
-                header = srna2sp[0].get_sorted_attr()
-                blast_result = Result("Conservation depth of each smallRNA", define_table(header, 'TableResult')(srna2sp))
-                results["srna2sp"] = blast_result
+                results["parameters"] = new_record.parameters
             except:
                 pass
 
-            try:            
-                parser = sRNAconsParser(os.path.join(new_record.outdir, "species2SRNA.txt"), "species2srna", 500)
-                srna2sp = [obj for obj in parser.parse()]
-                header = srna2sp[0].get_sorted_attr()
-                blast_result = Result("Input sequences contained in each species", define_table(header, 'TableResult')(srna2sp))
-                results["sp2srna"] = blast_result
-            except:
-                pass
-            
+            if os.path.exists(os.path.join(new_record.outdir,"identicalSequenceRelation.tsv")):
+                try:
+                    parser = sRNAconsParser(os.path.join(new_record.outdir, "sRNA2Species.txt"), "srna2species", 500)
+                    srna2sp = [obj for obj in parser.parse()]
+                    header = srna2sp[0].get_sorted_attr()
+                    blast_result = Result("Conservation depth of each smallRNA", define_table(header, 'TableResult')(srna2sp))
+                    results["srna2sp"] = blast_result
+                except:
+                    pass
+
+                try:            
+                    parser = sRNAconsParser(os.path.join(new_record.outdir, "species2SRNA.txt"), "species2srna", 500)
+                    srna2sp = [obj for obj in parser.parse()]
+                    header = srna2sp[0].get_sorted_attr()
+                    blast_result = Result("Input sequences contained in each species", define_table(header, 'TableResult')(srna2sp))
+                    results["sp2srna"] = blast_result
+                except:
+                    pass
+            else:
+                results["error"] = "Some errors were detected, please write with the number of this jobID ("+job_id+") to the administrator of the website."
             return render(request, 'sRNAcons/srnacons_result.html', results)
         else:
             return redirect(reverse_lazy('progress', kwargs={"pipeline_id": job_id}))
