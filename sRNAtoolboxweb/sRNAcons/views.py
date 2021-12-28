@@ -147,5 +147,5 @@ class sRNAcons(FormView):
         js.status.create(status_progress='sent_to_queue')
         js.job_status = 'sent_to_queue'
         js.save()
-        self.success_url = reverse_lazy('result') + '?id=' + pipeline_id
+        self.success_url = reverse_lazy('srnacons') + '?id=' + pipeline_id
         return super(sRNAcons, self).form_valid(form)
