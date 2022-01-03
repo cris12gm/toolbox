@@ -18,6 +18,7 @@ from django.utils.safestring import mark_safe
 import os
 
 import json
+from sRNAtoolboxweb.utils import create_collapsable_div, render_modal
 
 
 class sRNAconsForm(forms.Form):
@@ -25,8 +26,9 @@ class sRNAconsForm(forms.Form):
         ("plant","Plant"),
         ("animal","Animal")
     )
-    ifile = forms.FileField(label='Upload input file(Fasta file)', required=True)
-    mistmatches = forms.IntegerField(label="Number of mistmatches", required=True, initial=1)
+    ifile = forms.FileField(label='Upload input file(Fasta file)',required=False)
+    url = forms.URLField(label='URL/link',required=False)
+    mistmatches = forms.IntegerField(label="Number of mistmatches", required=False, initial=1)
     kingdom=forms.ChoiceField(label= 'Kingdom', choices=KINGDOMS, required=True)
 
 
@@ -35,16 +37,30 @@ class sRNAconsForm(forms.Form):
         super(sRNAconsForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
-
-            "ifile",
-            HTML("""<br>"""),
-            "mistmatches",
-            HTML("""<br>"""),
-            "kingdom",
-            HTML("""<br>"""),
+        create_collapsable_div(
+            TabHolder(
+                Tab('Upload',
+                    HTML("""<br>"""),
+                    Field('ifile', css_class='form-control'),
+                    ),
+                Tab('URL/link',
+                    HTML("""<br>"""),
+                    Field('url', css_class='form-control'),
+                    )
+            ),
+                title='Choose your input',
+                c_id='100',
+                extra_title=render_modal('Choose_Input'),
+                open=True
+            ),
+            create_collapsable_div(
+                Field("mistmatches", css_class='form-control'),
+                Field("kingdom", css_class="form-control"),
+                title='Parameters',
+                c_id='101',
+                open=True
+            ),
             ButtonHolder(
-                # Submit('submit', 'SUBMIT', css_class='btn btn-primary')
-                # Submit('submit', 'SUBMIT', css_class='btn btn-primary', onclick="return add_hidden(); return alert('he')")
                 Submit('submit', 'SUBMIT', css_class='btn btn-primary', onclick='return add_hidden();')
             )
 
@@ -52,7 +68,14 @@ class sRNAconsForm(forms.Form):
 
     def clean(self):
         cleaned_data = super(sRNAconsForm, self).clean()
-
+        if not cleaned_data.get('ifile') and not cleaned_data.get('url'):
+            self.add_error('ifile', 'One of these two fields is required (file or url)')
+            self.add_error('url', 'One of these two fields is required (file or url)')
+        if not cleaned_data.get('mistmatches'):
+            self.add_error('mistmatches', 'This field is required')
+        if cleaned_data.get('ifile') and cleaned_data.get('url'):
+            self.add_error('ifile', 'Choose either file or URL')
+            self.add_error('url', 'Choose either file or URL')
         return cleaned_data
     
     
@@ -78,6 +101,15 @@ class sRNAconsForm(forms.Form):
             file_to_update = ifile
             uploaded_file = str(file_to_update)
             ifile = FS.save(uploaded_file, file_to_update)
+        elif self.cleaned_data.get("url"):
+            url = self.cleaned_data.get("url")
+            extension = os.path.basename(url).split('.')[-1]
+            dest = os.path.join(FS.location, os.path.basename(url))
+            try:
+                ifile, headers = urllib.request.urlretrieve(url, filename=dest)
+            except:
+                os.system("wget --no-check-certificate "+url+" -O "+dest)
+                ifile = dest
         else:
             raise Http404
         name = pipeline_id + '_srnacons'

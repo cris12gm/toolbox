@@ -635,10 +635,10 @@ class FasubsetForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 "",
-                "ifile",
-                "url",
+                Field("ifile",css_class='form-control'),
+                Field("url",css_class='form-control'),
                 HTML("""<br>"""),
-                "faids",
+                Field("faids",css_class='form-control'),
 
                 HTML("""<br>"""),
                 ButtonHolder(
