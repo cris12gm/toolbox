@@ -23,13 +23,14 @@ from sRNAtoolboxweb.utils import create_collapsable_div, render_modal
 
 class sRNAconsForm(forms.Form):
     KINGDOMS = (
-        ("plant","Plant"),
-        ("animal","Animal")
+        ("animal","Animal"),
+        ("plant","Plant")
+
     )
     ifile = forms.FileField(label='Upload input file(Fasta file)',required=False)
     url = forms.URLField(label='URL/link',required=False)
     mistmatches = forms.IntegerField(label="Number of mistmatches", required=False, initial=1)
-    kingdom=forms.ChoiceField(label= 'Kingdom', choices=KINGDOMS, required=True)
+    kingdom=forms.ChoiceField(label= 'Kingdom', choices=KINGDOMS, required=False)
 
 
     def __init__(self, *args, **kwargs):
