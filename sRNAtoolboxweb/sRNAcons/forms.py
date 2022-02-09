@@ -29,7 +29,7 @@ class sRNAconsForm(forms.Form):
     )
     ifile = forms.FileField(label='Upload input file(Fasta file)',required=False)
     url = forms.URLField(label='URL/link',required=False)
-    mistmatches = forms.IntegerField(label="Number of mistmatches", required=False, initial=1)
+    mistmatches = forms.IntegerField(label="Number of mistmatches", required=True, initial=1)
     kingdom=forms.ChoiceField(label= 'Kingdom', choices=KINGDOMS, required=False)
 
 
@@ -72,8 +72,8 @@ class sRNAconsForm(forms.Form):
         if not cleaned_data.get('ifile') and not cleaned_data.get('url'):
             self.add_error('ifile', 'One of these two fields is required (file or url)')
             self.add_error('url', 'One of these two fields is required (file or url)')
-        if not cleaned_data.get('mistmatches'):
-            self.add_error('mistmatches', 'This field is required')
+        if not cleaned_data.get('mistmatches') and cleaned_data.get('mistmatches')!=0:
+            self.add_error('mistmatches', 'This field is required and should be equal to 0 or more')
         if cleaned_data.get('ifile') and cleaned_data.get('url'):
             self.add_error('ifile', 'Choose either file or URL')
             self.add_error('url', 'Choose either file or URL')
