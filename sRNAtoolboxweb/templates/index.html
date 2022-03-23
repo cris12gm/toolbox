@@ -51,6 +51,8 @@
                 </li>
                 <li class=""><a href="#miRNAconsTarget" data-toggle="tab">miRNAconsTarget</a>
                 </li>
+                <li class=""><a href="#sRNAcons" data-toggle="tab">sRNAcons</a>
+                </li>
 {#                <li class=""><a href="#sRNAjBrowser" data-toggle="tab">sRNAjBrowser</a>#}
 {#                </li>#}
 {#                <li class=""><a href="#sRNAjBrowserDE" data-toggle="tab">sRNAjBrowserDE</a>#}
@@ -71,7 +73,7 @@
                 </div>
 
                 <div class="tab-pane fade" id="batch">
-                    <a href="{{ settings.SUB_SITE }}/multiupload/"> <h3>sRNAbench (batch mode):</h3> <h4> Parallel expression profiling of small RNAs for several files at once</h4>  </a>
+                    <a href="{{ settings.SUB_SITE }}/newbench/"> <h3>sRNAbench (batch mode):</h3> <h4> Parallel expression profiling of small RNAs for several files at once</h4>  </a>
                     <h4 style="line-height: 150%"> Batch mode is a new feature of sRNAbench that allows for intuitive profiling of several samples at once.
                     If you have several samples with the same sequencing approach (library preparation) this tool will profile all these samples using the same
                     bioinformatics protocol. This will also guarantee that all your samples are profiled following the exact same steps.</h4>
@@ -154,6 +156,12 @@
                                 overrepresented GO-terms among the target genes. Apart from the complete set of microRNAs,
                                 it tests also all microRNA modules (combinations) which allow the user to detect the microRNAs
                                 that act on the same pathways or share the same functions.</h4>
+                </div>
+                <div class="tab-pane fade" id="sRNAcons">
+                    <a href="/srnacons/" > <h3>sRNAcons:</h3> <h4>Estimation of the conservation depth of small RNAs</h4>  </a>
+                    <h4 style="line-height: 150%"> User provided small RNA sequences (fasta format) are mapped against all assemblies available
+                        in sRNAtoolbox. The tool has two different outputs, i) The conservation depth for all small RNA input sequences, i.e
+                        the percentage of genomes in which the sequence was found, and ii)the percentage of mapped input sequences per genome.</h4>
                 </div>
 
             </div>
@@ -240,5 +248,3 @@
         </div>
         <!-- /#page-wrapper -->
 {% endblock %}
-
-
