@@ -44,6 +44,8 @@ class SRNABenchConfig():
         if user_files:
             self.libs += user_files
 
+        self.libsStringTypes = "mature#sense;hairpin#sense"
+        self.libsStringNames = "microRNA_sense"
         if assembly is not None:
             self.assembly = assembly
 
@@ -74,7 +76,6 @@ class SRNABenchConfig():
                 delattr(self, "assembly")
                 # delattr(self, "libsStringTypes")
                 # delattr(self, "libsStringNames")
-
 
         self.solid = solid
 

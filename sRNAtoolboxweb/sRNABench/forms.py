@@ -18,6 +18,7 @@ from sRNABench.models import Species
 from sRNAtoolboxweb.settings import MEDIA_ROOT, CONF, QSUB, BASE_DIR
 from sRNAtoolboxweb.utils import create_collapsable_div, render_modal
 from utils.pipeline_utils import generate_uniq_id
+import shutil
 
 
 class CategoriesField(forms.ModelMultipleChoiceField):
@@ -43,7 +44,7 @@ class CategoriesField(forms.ModelMultipleChoiceField):
                 else:
                     #list.append((category.id, str(category)))
                     # option value="2533:Danio rerio">Zebrafish(GRCz10)
-                    list.append((str(category.id) + ":" + category.scientific + " ", str(category)))
+                    list.append((str(category.id) + ":" + category.scientific, str(category)))
                     #list.append((str(category.id)+""+category.scientific, str(category)))
             try:
                 self.choices.append((group, list))
@@ -566,3 +567,173 @@ class sRNABenchForm(forms.Form):
             return '{sh} {configuration_file_path}'.format(
                 configuration_file_path=configuration_file_path,
                 sh=os.path.join(os.path.dirname(BASE_DIR) + '/core/bash_scripts/run.sh')), pipeline_id
+
+class contaminaForm(forms.Form):
+
+
+    job_reuse = forms.CharField(label='Provide sRNAbench jobID to analize bacterial and viral content',
+                                required=False)
+
+
+    def __init__(self, *args, **kwargs):
+        super(contaminaForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+
+            # in data cleaning we should check if the folder actually exists
+            create_collapsable_div(
+                'Reuse Job',
+                Field('job_reuse', css_class='form-control'),
+                title="Choose your input",
+                extra_title=render_modal('Choose_Input'),
+                c_id="1",
+                open=True
+            ),
+            ButtonHolder(
+                # Submit('submit', 'RUN', css_class='btn btn-primary', onclick="alert('Neat!'); return true")
+                # Submit('submit', 'RUN', css_class='btn btn-primary')
+                Submit('submit', 'RUN', css_class='btn btn-primary')
+                # onsubmit="alert('Neat!'); return false")
+
+            )
+        )
+
+    def create_conf_file(self, cleaned_data, pipeline_id):
+        conf = {}
+        conf['pipeline_id'] = pipeline_id
+        output_folder = os.path.join(MEDIA_ROOT, pipeline_id)
+        conf_file = os.path.join(MEDIA_ROOT, pipeline_id, "conf.txt")
+        # os.system("touch /shared/sRNAtoolbox/upload/test")
+        os.mkdir(output_folder)
+        # os.system("touch " + test_file)
+
+        job_ID = cleaned_data["job_reuse"]
+        orig_input_file = os.path.join(MEDIA_ROOT, job_ID, "reads.fa")
+        cp_input_file = os.path.join(MEDIA_ROOT, pipeline_id, "input_reads.fa")
+        shutil.copy(orig_input_file, cp_input_file)
+
+        libs = """
+                libs=Acidobacteria
+                libs=Aquificae
+                libs=Asgard-group
+                libs=Atribacterota
+                libs=Bacteria-incertae-sedis
+                libs=Caldiserica-Cryosericota-group
+                libs=Calditrichaeota
+                libs=Candidatus-Thermoplasmatota
+                libs=Chrysiogenetes
+                libs=Coprothermobacterota
+                libs=Deferribacteres
+                libs=Dictyoglomi
+                libs=DPANN-group
+                libs=Elusimicrobia
+                libs=Euryarchaeota
+                libs=FCB-group
+                libs=Fusobacteria
+                libs=Nitrospinae-Tectomicrobia-group
+                libs=Nitrospirae
+                libs=Other
+                libs=Proteobacteria
+                libs=PVC-group
+                libs=Spirochaetes
+                libs=Synergistetes
+                libs=TACK-group
+                libs=Terrabacteria-group
+                libs=Thermodesulfobacteria
+                libs=Thermotogae
+                libs=unclassified-Archaea
+                libs=unclassified-Bacteria
+                libs=land-plants_virus_host
+                libs=invertebrates_virus_host
+                libs=other_virus_host
+                libs=eukaryotic-algae_virus_host
+                libs=vertebrates_virus_host
+                libs=archaea_virus_host
+                libs=bacteria_virus_host
+                libs=fungi_virus_host
+                libs=protozoa_virus_host
+                libs=human_virus_host
+                libs=algae_virus_host
+                libs=plants_virus_host
+                """.replace(" ", "")
+        with open(conf_file, "w") as tf:
+            tf.write("input=" + cp_input_file + "\n")
+            tf.write(libs + "\n")
+            tf.write("output=" + output_folder + "\n")
+            tf.write("Rscript=/opt/local/R-3.5.3/bin/Rscript\n")
+            tf.write("zip=true\n")
+            tf.write("dbPath=/opt/sRNAtoolboxDB\n")
+            tf.write("seed=20\n")
+            tf.write("noMM=1\n")
+            tf.write("mBowtie=10\n")
+
+
+        name = pipeline_id + '_bench'
+        JobStatus.objects.create(job_name=name, pipeline_key=pipeline_id, job_status="not_launched",
+                                 start_time=datetime.now(),
+                                 all_files=cp_input_file,
+                                 modules_files="",
+                                 pipeline_type="sRNAbench",
+                                 )
+        configuration_file_path = os.path.join(output_folder, 'conf.json')
+        configuration = {
+            'pipeline_id': pipeline_id,
+            'out_dir': output_folder,
+            'name': name,
+            'conf_input': conf_file,
+            'type': 'sRNAbench'
+        }
+        with open(configuration_file_path, 'w') as conf:
+            json.dump(configuration, conf, indent=True)
+
+        return name, configuration_file_path
+
+
+
+
+
+
+
+
+
+        # FS = FileSystemStorage()
+        # FS.location = os.path.join(MEDIA_ROOT, pipeline_id)
+        # os.system("mkdir " + FS.location)
+        # out_dir = FS.location
+        # conf['out_dir'] = out_dir
+        # #Input
+        # ifile, libs_files = self.upload_files(cleaned_data, FS)
+        #
+        # #Species
+        # species = [i.db_ver for i in cleaned_data['species']]
+        # assemblies = [i.db for i in cleaned_data['species']]
+        # short_names = [i.shortName for i in cleaned_data['species']]
+        # micrornas_species = ':'.join(short_names)
+        # if cleaned_data.get("mirna_profiled"):
+        #     micrornas_species = cleaned_data.get("mirna_profiled")
+        # lib_mode = cleaned_data.get('library_mode')
+        # no_libs = cleaned_data.get('no_libs')
+        # is_solid = "false"
+        #
+        # #Reads preprocessing
+        # protocol = cleaned_data.get('library_protocol')
+        # adapter_length = str(cleaned_data['adapter_length'])
+        # adapter_mismatch = str(cleaned_data['adapter_mismatch'])
+        # nucleotides_5_removed = str(cleaned_data['nucleotides_5_removed'])
+        # remove3pBases = str(cleaned_data['nucleotides_3_removed'])
+        # recursive_adapter_trimming = str(cleaned_data.get('adapter_recursive_trimming')).lower()
+    def generate_id(self):
+        is_new = True
+        while is_new:
+            pipeline_id = generate_uniq_id()
+            if not JobStatus.objects.filter(pipeline_key=pipeline_id):
+                return pipeline_id
+
+    def create_call(self):
+        pipeline_id = self.generate_id()
+        name, configuration_file_path = self.create_conf_file(self.cleaned_data, pipeline_id)
+        if QSUB:
+            return 'qsub -v c="{configuration_file_path}" -N {job_name} {sh}'.format(
+                configuration_file_path=configuration_file_path,
+                job_name=name,
+                sh=os.path.join(os.path.dirname(BASE_DIR) + '/core/bash_scripts/run_qsub.sh')), pipeline_id

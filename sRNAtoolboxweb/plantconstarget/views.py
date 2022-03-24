@@ -6,7 +6,7 @@ import os
 import django_tables2 as tables
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect
-
+from sRNAtoolboxweb.settings import MEDIA_ROOT, CONF, QSUB, BASE_DIR, MEDIA_URL
 from django.views.generic import FormView
 from django.core.urlresolvers import reverse_lazy
 from plantconstarget.forms import PMirconsForm
@@ -165,21 +165,25 @@ def result(request):
 
         if new_record.job_status == "Finished":
 
-            os.system("touch " + os.path.join(new_record.outdir, "hello.txt"))
             plants = False
             min = 2
 
 
             results["parameters"] = new_record.parameters
 
-            for param in new_record.parameters.split("\n"):
-                if "Programs:" in param:
-                    min = len(param.split(" ")[1].split(":"))
+            try:
+                for param in new_record.parameters.split("\n"):
+                    if "Programs:" in param:
+                        min = len(param.split(" ")[1].split(":"))
+            except:
+                print("do nothing")
 
-            if "PSROBOT" in new_record.parameters or "TAPIR_FASTA" in new_record.parameters or "TAPIR_HYBRID" in new_record.parameters:
-                plants = True
-                min = 1
-
+            try:
+                if "PSROBOT" in new_record.parameters or "TAPIR_FASTA" in new_record.parameters or "TAPIR_HYBRID" in new_record.parameters:
+                    plants = True
+                    min = 1
+            except:
+                print("do nothing")
 
             parser = TargetConsensusParser(new_record.consensus_file)
             list_d = [obj for obj in parser.get_by_n(min)]
@@ -194,6 +198,12 @@ def result(request):
             except:
                 results[id] = Result(id, define_table(["Results"], 'TableResult', plants)([{"Results": "Results not found!"}]))
 
+            all_files = [x for x in os.listdir(new_record.outdir) if os.path.isfile(os.path.join(new_record.outdir, x))]
+            files_to_serve = [x for x in all_files if (x.startswith("multipleTargets") or x.startswith("perTranscript") or x.startswith("positionalConsensus"))]
+            init_url = new_record.outdir.replace(MEDIA_ROOT, MEDIA_URL)
+            positional_files = [ [x, os.path.join(init_url, x)] for x in files_to_serve ]
+
+
             results["zip"] = "/".join(new_record.zip_file.split("/")[-2:])
             #return render(request, "mirconstarget_result.html", results)
             try:
@@ -202,6 +212,7 @@ def result(request):
                 pass
             results["id"] = job_id
             results["date"] = new_record.start_time + datetime.timedelta(days=15)
+            results["positional_files"] = positional_files
             return render(request, "mirconstarget_result.html", results)
 
         else:

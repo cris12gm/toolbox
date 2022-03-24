@@ -57,11 +57,17 @@ INSTALLED_APPS = [
     'sRNAgFree',
     'django_tables2',
     'dajax',
+<<<<<<< HEAD
     
     'multi',
     'miRNAgFree',
     'sRNAcons',
     'content'
+=======
+    'multibench',
+    'multi',
+    "miRNAgFree"
+>>>>>>> upstream/develop
 ]
 
 MIDDLEWARE = [
@@ -172,8 +178,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+<<<<<<< HEAD
 #SUB_SITE = ''
 SUB_SITE = '/srnatoolbox'
+=======
+# SUB_SITE = ''
+SUB_SITE = ''
+>>>>>>> upstream/develop
 STATIC_URL = SUB_SITE + '/static/'
 MEDIA_URL = SUB_SITE + '/media/'
 
@@ -186,7 +197,7 @@ STATICFILES_DIRS = [
 
 ]
 
-STATIC_ROOT= "/var/www/html/sRNAtoolbox_static/"
+# STATIC_ROOT= "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxweb/sRNAtoolboxweb/static"
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
@@ -202,13 +213,18 @@ CONF = {
     "jBrowserWWWPathGenome": "/sRNAtoolbox/sRNAjBrowser/genomes",
     "seqObj": "/srv/shared/sRNAtoolboxDB/seqOBJ",
     "annotationPath": "/shared/sRNAtoolboxDB/jBrowserAnnot",
-    "species": "/opt/sRNAtoolboxDB/species.txt",
+    "species": "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxDB/species.txt",
     #"speciesAnnotation": "/home/aruedamartin/annotation.txt",
+<<<<<<< HEAD
     "mirDbPath" : "/opt/sRNAtoolboxDB/mirdb.tsv",
     "MirGeneDB_data" : "/opt/sRNAtoolboxDB/miRGeneDB.tsv",
+=======
+    "mirDbPath" : "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxDB/mirdb.tsv",
+    "MirGeneDB_data" : "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxDB/miRGeneDB.tsv",
+>>>>>>> upstream/develop
     "speciesAnnotation": "/opt/sRNAtoolboxDB/annotation.txt",
     "targetAnnotation": "/shared/sRNAtoolboxDB/targetAnnot.txt",
-    "db": "/opt/sRNAtoolboxDB",
+    "db": "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxDB",
     "exec": "/opt/sRNAtoolboxDB/exec",
     "RNAcentral": "/shared/sRNAtoolboxDB/dbs/rnacentral_active.fasta",
     "tRNA": "/shared/sRNAtoolboxDB/dbs/eukaryotic-tRNAs.fa",
@@ -217,6 +233,10 @@ CONF = {
 
 QSUB = True
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/develop
 MANUAL_URL = os.path.join(STATIC_URL, "webmanual.pdf")
 
 SETTINGS_EXPORT = [
@@ -224,6 +244,12 @@ SETTINGS_EXPORT = [
     'MANUAL_URL',
     'STATIC_URL'
 ]
+<<<<<<< HEAD
 
 BENCH_PLOTLY = "/opt/sRNAtoolbox_prod/sRNAtoolboxweb/sRNABench/bench_plots_gen.py"
 PATH_TO_VENV = "/opt/venv/sRNAtoolbox2019/bin/"
+=======
+BENCH_PLOTLY = "/opt/sRNAtoolbox_prod/sRNAtoolboxweb/sRNABench/bench_plots_gen.py"
+PATH_TO_VENV = "/opt/venv/sRNAtoolbox2019/bin/"
+
+>>>>>>> upstream/develop

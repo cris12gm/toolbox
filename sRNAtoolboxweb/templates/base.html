@@ -83,6 +83,14 @@
 {#        All jobs will continue to be carried out as normal once the service is restarted, sorry for the incovinience.#}
 {#        <br> </p>#}
 
+{#    <p class="alert alert-danger" style="font-size:28px;"> <br> Dear users, we are currently implementing improvements to sRNAtoolbox. <br>#}
+{#        We are working to improve sRNAtoolbox experience#}
+{#        and update our annotations. Jobs launched while this banner is up may not run properly.#}
+{#        We expect all changes will be made by March the 23rd at 8AM (GMT +1) and service completely restored.#}
+{#        Sorry for the inconvinience and thanks for your patience.#}
+{#        <br> </p>#}
+
+
             {% if user_message %}
 
                 <p class="alert alert-danger" style="font-size:28px;"> <br>
@@ -103,7 +111,29 @@
 
     <div id="wrapper">
 
+
+{#            <div id="cookie_directive_container" class="container">#}
+            <div id="cookie_directive_container" class="container" style="display: none">
+                        <nav class="navbar navbar-default navbar-fixed-bottom">
+                            <br>
+                            <div class="container">
+                            <div class="navbar-inner navbar-content-center" id="cookie_accept">
+
+                                <a href="javascript:void(0)" class="btn btn-primary pull-right">Close</a>
+                                <p class="text-muted credit">
+                                    This site does not use cookies to track your behaviour or keep any personal data. We belong to University of Granada, so its <a href="https://www.ugr.es/condiciones-legales">terms and conditions</a> apply.
+                                </p>
+                                <br>
+
+                            </div>
+                          </div>
+
+                        </nav>
+                    </div>
+
+
         <!-- Navigation -->
+
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -141,12 +171,12 @@
                         <li>
                             <a href="#"><i class="fa fa-gears fa-fw"></i> Tools<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
-                                <li>
-                                    <a href="{{ settings.SUB_SITE }}/srnabench/">sRNAbench</a>
-                                </li>
+{#                                <li>#}
+{#                                    <a href="{{ settings.SUB_SITE }}/srnabench/">sRNAbench</a>#}
+{#                                </li>#}
 
                                 <li>
-                                    <a href="{{ settings.SUB_SITE }}/multiupload/">sRNAbench (batch mode)</a>
+                                    <a href="{{ settings.SUB_SITE }}/newbench/">sRNAbench</a>
                                 </li>
 
                                 <li>
@@ -163,15 +193,25 @@
 {#                                    <a href="https://bioinfo5.ugr.es/srnatoolbox/srnablast/">sRNAblast</a>#}
                                 </li>
 
+                                <li>
+                                    <a href="{{ settings.SUB_SITE }}/newbench/contamination">sRNAbench-microbes</a>
+{#                                    <a href="https://bioinfo5.ugr.es/srnatoolbox/srnablast/">sRNAblast</a>#}
+                                </li>
+
+                                <li>
+                                    <a href="{{ settings.SUB_SITE }}/srnacons/">sRNAcons</a>
+{#                                    <a href="https://bioinfo5.ugr.es/srnatoolbox/srnablast/">sRNAblast</a>#}
+                                </li>
+
 {#                                <li>#}
 {#                                    <a href="{{ settings.SUB_SITE }}/srnablast">sRNAblast</a>#}
 {#                                </li>#}
 
                                 <li>
-                                    <a href="{{ settings.SUB_SITE }}/pmirconstarget/">plantconstarget</a>
+                                    <a href="{{ settings.SUB_SITE }}/pmirconstarget/">miRconstargent (plants)</a>
                                 </li>
                                 <li>
-                                    <a href="{{ settings.SUB_SITE }}/amirconstarget/">animalconstarget</a>
+                                    <a href="{{ settings.SUB_SITE }}/amirconstarget/">miRconstargent (animals)</a>
                                 </li>
 {#                                <li>#}
 {#                                    <a href="{{ settings.SUB_SITE }}/pmirconstarget">plantconstarget</a>#}
@@ -256,6 +296,7 @@
                         </li>
                     </ul>
                 </div>
+
                 <!-- /.sidebar-collapse -->
             </div>
             <!-- /.navbar-static-side -->
@@ -264,6 +305,12 @@
 
 
         {% include "Messages/bench/HWTCbench.html" %}
+
+
+
+
+
+
         {% block content %}{% endblock %}
         {% block modals %}
 
@@ -271,10 +318,62 @@
 
 
 
+    </div>
 
 
     <!-- /#wrapper -->
 
+    <script>
+        jQuery(function($) {
+
+    checkCookie_eu();
+
+    function checkCookie_eu()
+    {
+
+        var consent = getCookie_eu("cookies_consent");
+
+        if (consent == null || consent == "" || consent == undefined)
+        {
+            // show notification bar
+            $('#cookie_directive_container').show();
+        }
+
+    }
+
+    function setCookie_eu(c_name,value,exdays)
+    {
+
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + exdays);
+        var c_value = escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+        document.cookie = c_name + "=" + c_value+"; path=/";
+
+        $('#cookie_directive_container').hide('slow');
+    }
+
+
+    function getCookie_eu(c_name)
+    {
+        var i,x,y,ARRcookies=document.cookie.split(";");
+        for (i=0;i<ARRcookies.length;i++)
+        {
+            x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+            y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+            x=x.replace(/^\s+|\s+$/g,"");
+            if (x==c_name)
+            {
+                return unescape(y);
+            }
+        }
+    }
+
+    $("#cookie_accept a").click(function(){
+        setCookie_eu("cookies_consent", 1, 30);
+    });
+
+});
+    </script>
 
     {% block js %}  {% endblock %}
 

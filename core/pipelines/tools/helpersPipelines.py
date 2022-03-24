@@ -1,5 +1,5 @@
 import os
-from time import strftime, gmtime
+from time import strftime, gmtime, sleep
 #from progress.models import JobStatus
 from pipelines.pipelines import Pipeline
 
@@ -15,13 +15,18 @@ class helpersPipelines(Pipeline):
     def run(self):
         log_msg = strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " INFO: Helper tool Starts"
         self.actualize_pipeline_progress(log_msg)
-        cmd="sRNAhelper "+ self.conf_input
+        # cmd="sRNAhelper "+ self.conf_input
+        cmd = "java -jar " + self.configuration.path_to_helpers + " " + self.conf_input
         os.system(cmd)
+        self.change_pipeline_status("Running")
+        # self.change_pipeline_status("Finished")
         self.set_java_command_line(cmd)
         log_msg = strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " SUCCESS: Helper tool finished"
         self.actualize_pipeline_progress(log_msg)
+        # self.change_pipeline_status("Finished")
         if self.set_out_files():
             self.set_finish_time()
+            # sleep(4)
             self.change_pipeline_status("Finished")
 
     def run1(self):

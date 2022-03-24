@@ -1,6 +1,7 @@
 import time
 import glob
 from django.shortcuts import render, redirect
+from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse
 from django.views import View
 from django.views.generic import FormView, DetailView
@@ -20,6 +21,9 @@ import shutil
 import datetime
 import json
 import re
+import pandas as pd
+import csv
+from collections import OrderedDict
 
 def make_folder(path):
     if not os.path.exists(path):
@@ -207,7 +211,7 @@ class MultiLaunchView(FormView):
         # call, pipeline_id = form.create_call()
         # self.success_url = reverse_lazy('mirconstarget') + '?id=' + pipeline_id
 
-def RelaunchMulti(request):
+def RelaunchMultiOld(request):
     old_ID = str(request.path_info).split("/")[-1]
 
     random_ID = generate_id()
@@ -228,6 +232,34 @@ def RelaunchMulti(request):
     if os.path.exists(os.path.join(MEDIA_ROOT, random_ID)):
         url = reverse('multi:multi_launch') + random_ID
         return redirect(url)
+
+
+
+
+    url = reverse('multi:multi_launch') + old_ID
+    # url = reverse('multi:multi_launch') + random_ID
+    return redirect(url)
+
+def RelaunchMulti(request):
+    old_ID = str(request.path_info).split("/")[-1]
+
+    random_ID = generate_id()
+    old_dir = os.path.join(MEDIA_ROOT, old_ID)
+
+    if os.path.exists(old_dir):
+        os.mkdir(os.path.join(MEDIA_ROOT, random_ID))
+        JobStatus.objects.create(job_name=random_ID + "_multi", pipeline_key=random_ID, job_status="not_launched",
+                                 start_time=datetime.datetime.now(),
+                                 all_files=" ",
+                                 modules_files=" ",
+                                 pipeline_type="multiupload",
+                                 )
+        shutil.copy(os.path.join(MEDIA_ROOT, old_ID, "input.json"), os.path.join(MEDIA_ROOT, old_ID, "input.json"))
+        os.system("touch " + old_dir)
+
+        if os.path.exists(os.path.join(MEDIA_ROOT, random_ID)):
+            url = reverse('multi:multi_launch') + random_ID
+            return redirect(url)
 
 
 
@@ -292,7 +324,301 @@ def download_list(multi_id):
 
     return data["files"]
 
+# def ajax_annot_cell(request):
+#
+#     if request.method == 'POST':
+#         jobID = request.GET.get("jobID")
+#         # topN = int(request.GET.get("top"))
+#
+#         new_record = JobStatus.objects.get(pipeline_key=jobID)
+#         myfile = request.FILES['myfile']
+#         fs = FileSystemStorage(location=folder)  # defaults to   MEDIA_ROOT
+#         filename = fs.save(myfile.name, myfile)
+#         file_url = fs.url(filename)
+#         return render(request, 'upload.html', {
+#             'file_url': file_url
+#         })
+#
+#     data = {}
+#     data["jobID"] = jobID
+#     data["topN"] = topN
+#     data["url"] = "https://genecodis.genyo.es/gc4/externalquery&org=9606&genes=" + ",".join(result)
+#     return JsonResponse(data)
 
+def ajax_annot_file(request):
+    print("x")
+
+def check_file(file_path):
+
+    print("x")
+
+def read_annot_file(file_path):
+    # input sheet should have headder
+    # TODO checks
+    if file_path.endswith("xls") or file_path.endswith("xlsx"):
+        annot_df = pd.read_excel(file_path)
+    else:
+        s = csv.Sniffer()
+        d = s.sniff(
+            open(file_path).read(100)).delimiter
+        annot_df = pd.read_csv(file_path, d)
+
+    return annot_df
+
+def annotate_input(jobID, annotation_file):
+    dict_path = os.path.join(MEDIA_ROOT, jobID, "input.json")
+    json_file = open(dict_path, "r")
+    input_dict = json.load(json_file, object_pairs_hook=OrderedDict)
+    json_file.close()
+
+    annot_df = read_annot_file(annotation_file)
+    # inputs = annot_df["Input"].tolist()
+    for index, row in annot_df.iterrows():
+        i = row[0]
+        if input_dict.get(i):
+            shallow_dict = input_dict.get(i)
+            c_key = i
+        else:
+            succesful = False
+            for k in input_dict.keys():
+                if k.endswith("/" + i):
+                    shallow_dict = input_dict.get(k)
+                    c_key = k
+                    succesful = True
+            if not succesful:
+                continue
+
+        shallow_dict["name_annotation"] = str(row[1])
+        shallow_dict["group_annotation"] = str(row[2])
+        input_dict[c_key] = shallow_dict
+
+    json_file = open(dict_path, "w")
+    json.dump(input_dict, json_file, indent=6)
+    json_file.close()
+
+
+
+def generate_download_template(request):
+    parameters = request.GET
+    folder = parameters["jobId"]
+    dict_path = os.path.join(MEDIA_ROOT, folder, "input.json")
+    json_file = open(dict_path, "r")
+    input_dict = json.load(json_file, object_pairs_hook=OrderedDict)
+    json_file.close()
+
+    annot_df = pd.DataFrame(columns=['Input', 'Name', 'Group'])
+    for i,k in enumerate(input_dict.keys()):
+        shallow_dict = input_dict.get(k)
+        row = []
+        if shallow_dict.get("input_type") == "uploaded file":
+            input_string = shallow_dict.get("name")
+        else:
+            input_string = shallow_dict.get("input")
+        name = shallow_dict.get("name_annotation", "")
+        group = shallow_dict.get("group_annotation", "")
+
+        annot_df.loc[i] = pd.Series({'Input': input_string, 'Name': name, 'Group': group})
+
+    # test_file = os.path.join(MEDIA_ROOT, folder, "test.xlsx")
+    template_file = os.path.join(MEDIA_ROOT, folder, "template.xlsx")
+    annot_df.to_excel(template_file, index=False)
+    # os.system("touch " + test_file)
+    url = template_file.replace(MEDIA_ROOT, MEDIA_URL)
+    return redirect(url)
+
+
+
+class Annotate(DetailView):
+    model = JobStatus
+    slug_field = 'pipeline_key'
+    slug_url_kwarg = 'pipeline_id'
+    template_name = 'newBench/annotate.html'
+    def post(self, request, *args, **kwargs):
+
+        context = {}
+        path = str(request.path_info)
+        jobId = path.split("/")[-1]
+        # destination_path = os.path.join(MEDIA_ROOT, jobId, "hey.txt")
+        annotation_folder = os.path.join(MEDIA_ROOT, jobId, "annotation")
+        if not os.path.exists(annotation_folder):
+            os.mkdir(annotation_folder)
+        else:
+            shutil.rmtree(annotation_folder)
+            os.mkdir(annotation_folder)
+        # to_upload = request.FILES['annotationInputFile']
+        to_upload = request.FILES.get('annotationInputFile')
+        fs = FileSystemStorage(location=annotation_folder)
+        filename = fs.save(to_upload.name, to_upload)
+        try:
+            annotate_input(jobId, os.path.join(annotation_folder, filename))
+        except:
+            # shutil.rmtree(annotation_folder)
+            # os.mkdir(annotation_folder)
+            error_file = os.path.join(annotation_folder, "error.error")
+            os.system("touch " + error_file)
+            # context["error_message"] = "There was some error parsing your file. Please check again the format and requirements."
+
+        return redirect(reverse_lazy('multi:multi_annotate') + jobId)
+
+    def render_to_response(self, context,  **response_kwargs):
+
+        job_status = context.get('object')
+        pipeline_id = job_status.pipeline_key
+        jobs_folder = os.path.join(MEDIA_ROOT,pipeline_id,"launched")
+        if not os.path.exists(jobs_folder):
+            return redirect(reverse_lazy("launch")+ "?jobId=" + pipeline_id)
+
+        error_file = os.path.join(MEDIA_ROOT, pipeline_id, "annotation", "error.error")
+        if os.path.exists(error_file):
+            context["error_message"] = "There was some error parsing your file. Please check the format and requirements again to fix it."
+
+
+        output_folder = os.path.join(MEDIA_ROOT, pipeline_id)
+        dict_path = os.path.join(output_folder, "input.json")
+        json_file = open(dict_path, "r")
+        input_dict = json.load(json_file, object_pairs_hook=OrderedDict)
+        json_file.close()
+
+        samples = []
+
+        for i,k in enumerate(input_dict.keys()):
+            c_dict = input_dict[k]
+            input_line = c_dict["input"]
+            orig_input = input_line
+            if "/" in input_line:
+                input_line = input_line.split("/") [-1]
+            name_annotation = c_dict.get("name_annotation", "Not annotated")
+            if name_annotation == "nan":
+                name_annotation = "Not annotated"
+            group_annotation = c_dict.get("group_annotation", "Not annotated")
+            if group_annotation == "nan":
+                group_annotation = "Not annotated"
+            samples.append([orig_input, input_line, name_annotation, group_annotation, i])
+
+
+        context["all_samples"] = samples
+        context["jobID"] = pipeline_id
+        context["go_back_url"] = reverse_lazy("multi:multi_status") + pipeline_id
+
+        context["user_message"] = "This page is still in development, " \
+                                  "please do not use it as it will probably not work. Thank you "
+
+
+        return super(Annotate, self).render_to_response(context, **response_kwargs)
+
+
+
+
+
+# https://arn.ugr.es/srnatoolbox/multiupload/status/0SM8DZFZPQL2YE3
+class MultiStatusViewAnnot(DetailView):
+    model = JobStatus
+    slug_field = 'pipeline_key'
+    slug_url_kwarg = 'pipeline_id'
+    template_name = 'newBench/multi_status_annot.html'
+
+    def render_to_response(self, context,  **response_kwargs):
+
+        job_status = context.get('object')
+        pipeline_id = job_status.pipeline_key
+        jobs_folder = os.path.join(MEDIA_ROOT,pipeline_id,"launched")
+        if not os.path.exists(jobs_folder):
+            return redirect(reverse_lazy("launch")+ "?jobId=" + pipeline_id)
+
+
+        launched_ids = [f for f in listdir(jobs_folder) if os.path.isfile(os.path.join(jobs_folder,f))]
+        context["ids_strings"] = ",".join(launched_ids)
+
+        dict_path = os.path.join(MEDIA_ROOT, pipeline_id, "input.json")
+        json_file = open(dict_path, "r")
+        input_dict = json.load(json_file, object_pairs_hook=OrderedDict)
+        json_file.close()
+
+        # make annotation compatible
+        short_dict = {os.path.basename(x):input_dict.get(x) for x in input_dict.keys()}
+
+        jobs_tbody = []
+        context["running"] = False
+        # if len(launched_ids)>3:
+        #     context["launchDE"] = True
+        finished = 0
+        for id in launched_ids:
+
+            job = '<a href="'+SUB_SITE+'/jobstatus/' + id +'" target="_blank" >' + id +'</a>'
+            new_record = JobStatus.objects.get(pipeline_key=id)
+
+            # ptype = new_record.pipeline_type
+            # if ptype == "miRNAgFree":
+            #     return redirect(reverse_lazy("mirgfree:"))
+
+            job_stat = new_record.job_status
+            if job_stat == "sent_to_queue":
+                job_stat = "In queue"
+            if job_stat == "Running" or job_stat == "In queue":
+                context["running"] = True
+            if job_stat == "Finished":
+                finished = finished+1
+            start = new_record.start_time.strftime("%H:%M:%S, %d %b %Y")
+            #finish = new_record.finish_time.strftime("%H:%M, %d %b %Y")
+            if new_record.finish_time:
+                finish = new_record.finish_time.strftime("%H:%M, %d %b %Y")
+            else:
+                finish = "-"
+            input_config = os.path.join(MEDIA_ROOT,id,"conf.txt")
+            with open(input_config,"r") as f:
+                input_line = os.path.basename(f.readlines()[0][6:])
+            # job_stat = "sent_to_queue"
+            click = '<a href="'+SUB_SITE+'/jobstatus/' + id +'" target="_blank" > Go to results </a>'
+            outdir = new_record.outdir
+            annot_dict = short_dict.get(input_line.rstrip(), {})
+            name_annotation = annot_dict.get("name_annotation", "Not annotated")
+            if name_annotation == "nan":
+                name_annotation = "Not annotated"
+            group_annotation = annot_dict.get("group_annotation", "Not annotated")
+            if group_annotation == "nan":
+                group_annotation = "Not annotated"
+            annot_dict["jobID"] = id
+            short_dict[input_line.rstrip()] = annot_dict
+            jobs_tbody.append([job, job_stat, start,finish ,input_line.rstrip(), name_annotation, group_annotation])
+            # jobs_tbody.append([job, job_stat, start,finish ,input_line, click])
+
+
+
+
+        if finished > 3 and (not context["running"]):
+            context["launchDE"] = True
+
+
+        js_data = json.dumps(jobs_tbody)
+        js_headers = json.dumps([{"title": "job ID"},
+                                 {"title": "Status"},
+                                 {"title": "Started"},
+                                 {"title": "Finished"},
+                                 {"title": "Input"},
+                                 {"title": "Name"},
+                                 {"title": "Group"},
+                                 # { "title": "Select" }])
+                                 # {"title": 'Go to'}
+
+                                 ]
+                                )
+        #
+        #
+        #
+        # THIS ALTERS THE INPUT.JSON
+        #
+        #
+        #
+        json_file = open(os.path.join(MEDIA_ROOT, pipeline_id, "input.json"), "w")
+        json.dump(short_dict, json_file, indent=6)
+        json_file.close()
+
+        context["tbody"] = js_data
+        context["thead"] = js_headers
+        context["njobs"] = len(jobs_tbody)
+        context["id"] = pipeline_id
+        context["download_list"] = download_list(pipeline_id)
+        return super(MultiStatusViewAnnot, self).render_to_response(context, **response_kwargs)
 
 class MultiStatusView(DetailView):
     model = JobStatus
@@ -370,6 +696,7 @@ class MultiStatusView(DetailView):
         context["id"] = pipeline_id
         context["download_list"] = download_list(pipeline_id)
         return super(MultiStatusView, self).render_to_response(context, **response_kwargs)
+
 
 
 

@@ -17,7 +17,10 @@ from django.core.urlresolvers import reverse_lazy
 from django.conf import settings
 from FileModels.sRNAconsParsers import sRNAconsParser
 from .summary_plots import makesrnasPlot,makeSpeciesPlot
+<<<<<<< HEAD
 from django.http import JsonResponse
+=======
+>>>>>>> upstream/develop
 
 #SPECIES_PATH = '/shared/data/sRNAbench/species.csv'
 #SPECIES_ANNOTATION_PATH = '/shared/data/sRNAbench/annotation.txt'
@@ -34,11 +37,19 @@ class TableResult(tables.Table):
     """
 
     class Meta:
+<<<<<<< HEAD
         orderable = True
         attrs = {'class': 'table table-striped table-bordered table-hover dataTable no-footer',
                  "id": lambda: "table_%d" % next(counter)}
         empty_text = "Results not found!"
         order_by = ("percentage")
+=======
+        orderable = False
+        attrs = {'class': 'table table-striped table-bordered table-hover dataTable no-footer',
+                 "id": lambda: "table_%d" % next(counter)}
+        empty_text = "Results not found!"
+        order_by = ("frequency",)
+>>>>>>> upstream/develop
 
 
 def define_table(columns, typeTable):
@@ -47,7 +58,10 @@ def define_table(columns, typeTable):
     :return: a class of type TableResults
     """
     attrs = dict((c, tables.Column()) for c in columns)
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/develop
     if typeTable == "TableResult":
         attrs['Meta'] = type('Meta', (),
                              dict(attrs={'class': 'table table-striped table-bordered table-hover dataTable no-footer',
@@ -64,6 +78,7 @@ def define_table(columns, typeTable):
                                   order_by=("frequency",)))
 
 
+<<<<<<< HEAD
     klass = type('TableResult', (tables.Table,), attrs)
     return klass
 
@@ -81,6 +96,12 @@ def querySpecies(request):
 #        dataGen["tableContent"]=""
     return JsonResponse(dataGen)
 
+=======
+
+    klass = type('TableResult', (tables.Table,), attrs)
+    return klass
+
+>>>>>>> upstream/develop
 
 class Result():
     """
@@ -128,6 +149,7 @@ def result(request):
                     header = srna2sp[0].get_sorted_attr()
                     blast_result = Result("Conservation per sRNA", define_table(header, 'TableResult')(srna2sp))
                     results["srna2sp"] = blast_result
+<<<<<<< HEAD
 
                     fileTable = open(os.path.join(new_record.outdir, "sRNA2Species.txt"),'r')
                     tableSRNA = {}
@@ -151,6 +173,12 @@ def result(request):
                     pass
 
                 try:            
+=======
+                except:
+                    pass
+
+                try:
+>>>>>>> upstream/develop
                     parser = sRNAconsParser(os.path.join(new_record.outdir, "species2SRNA.txt"), "species2srna", 1000)
                     srna2sp = [obj for obj in parser.parse()]
                     header = srna2sp[0].get_sorted_attr()
@@ -170,6 +198,7 @@ def result(request):
                     results["graphicSum_2"] = graphicSum_2
                 except:
                     pass
+<<<<<<< HEAD
 
                 try:
                     cmd = "zip -j -r "+os.path.join(new_record.outdir,"results.zip")+" "+os.path.join(new_record.outdir,"sRNA2Species.txt")+" "+os.path.join(new_record.outdir,"species2SRNA.txt")
@@ -181,6 +210,8 @@ def result(request):
                     results["downloadAll"]=""
                     results["downloadsRNA"] = ""
                     results["downloadspecies"] = ""
+=======
+>>>>>>> upstream/develop
             else:
                 results["error"] = "Some errors were detected, please email with the number of this jobID ("+job_id+") to the administrator of the website."
             return render(request, 'sRNAcons/srnacons_result.html', results)

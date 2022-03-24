@@ -224,6 +224,7 @@ def run(request, tool):
                 '_h_trna /shared/sRNAtoolbox/core/bash_scripts/run_helper_trna.sh')
 
     if tool == "fasubset":
+<<<<<<< HEAD
 
         if "ifile" in request.FILES:
             file_to_update = request.FILES['ifile']
@@ -244,6 +245,25 @@ def run(request, tool):
         else:
             return render(request, "error_page.html", {"errors": ["URL of file must be provided"]})
 
+=======
+
+        if "ifile" in request.FILES:
+            file_to_update = request.FILES['ifile']
+            uploaded_file = str(file_to_update)
+            FS.save(uploaded_file, file_to_update)
+            ifile = os.path.join(FS.location, uploaded_file)
+
+        elif request.POST["url"].replace(" ", "") != "":
+            url_input = request.POST["url"]
+            dest = os.path.join(FS.location, os.path.basename(url_input))
+            handler = urllib.URLopener()
+            handler.retrieve(url_input, dest)
+            ifile = dest
+
+        else:
+            return render(request, "error_page.html", {"errors": ["URL of file must be provided"]})
+
+>>>>>>> upstream/develop
         os.system(
                 'qsub -v pipeline="helper",mode="fasubset",key="' + pipeline_id + '",outdir="' + FS.location +
                 '",inputfile="' + ifile + '",name="' + pipeline_id + '_h_fasubset' + '" -N ' + pipeline_id +
@@ -312,7 +332,11 @@ def result_Fasubset(request):
             for line in fd:
                 if "Filtered fastafile" in line:
                     value = line.replace("\n", "").split(",")[-1]
+<<<<<<< HEAD
                     backvalue = value.split("/")[-1]
+=======
+                    backvalue = value
+>>>>>>> upstream/develop
                 if "File: ID mappings" in line:
                     mappings = line.replace("\n", "").split(",")[-1]
                 if "ERROR" in line:

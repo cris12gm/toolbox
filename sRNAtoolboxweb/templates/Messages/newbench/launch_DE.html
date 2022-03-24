@@ -1,0 +1,44 @@
+{% extends "Messages/modal_template.html" %}
+{% block id %}launch_DE{% endblock %}
+{% block title %}
+    Differential expression from sRNAbench samples
+{% endblock %}
+{% block text %}
+
+
+
+{#    <div style="display: inline-block" id="dropbox-container"></div>#}
+{#    <button onclick="onApiLoad()"><i class="fab fa-google-drive"></i></button>#}
+{#    <button onclick="onApiLoad()">Pick From Google Drive</button>#}
+
+{#  AIzaSyBG_apmyiqz0PVwA6FO_GionR-e1Zz7DlI  GOOGLE API KEY  #}
+
+<p></p>
+    <p>You can specify groups/conditions for sRNAbench samples to compute differential expression using sRNAde.</p>
+    <p>There are two ways to do it, using the annotation that can be updated on this page or running an independent sRNAde job. </p>
+    <div class="row">
+    <div class="col-lg-6">
+        <a href="{% url 'DE_multi' %}{{ id }}" target="_blank" class="btn btn-link" ><button type="button" class="btn btn-primary" data-toggle="tooltip"
+        data-placement="top"  title="Launch a sRNAde job (Differential Expression) by manually providing groups or conditions for each sample"
+        >sRNAde (new annotation) </button></a>
+    </div>
+    <div class="col-lg-6">
+        <a href="{% url 'launch_annot' %}{{ id }}" target="_blank" class="btn btn-link" ><button type="button" class="btn btn-primary"
+         data-toggle="tooltip"  data-placement="top"  title="Launch a sRNAde job with the annotation already provided"
+        >sRNAde (current annotation) </button></a>
+    </div>
+
+    </div>
+    <div class="row">
+    <div class="col-lg-6">
+        <a href="{% url 'multi:multi_annotate' %}{{ id }}" class="btn btn-link"><button type="button" class="btn btn-info">Annotate Samples <i class="fa fa-pen"> </i> </button></a>
+    </div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}

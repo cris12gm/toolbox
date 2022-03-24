@@ -635,10 +635,17 @@ class FasubsetForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 "",
+<<<<<<< HEAD
                 Field("ifile",css_class='form-control'),
                 Field("url",css_class='form-control'),
                 HTML("""<br>"""),
                 Field("faids",css_class='form-control'),
+=======
+                "ifile",
+                "url",
+                HTML("""<br>"""),
+                "faids",
+>>>>>>> upstream/develop
 
                 HTML("""<br>"""),
                 ButtonHolder(
@@ -662,6 +669,7 @@ class FasubsetForm(forms.Form):
             pipeline_id = generate_uniq_id()
             if not JobStatus.objects.filter(pipeline_key=pipeline_id):
                 return pipeline_id
+<<<<<<< HEAD
 
     def create_call(self):
         pipeline_id = self.generate_id()
@@ -699,6 +707,45 @@ class FasubsetForm(forms.Form):
             file.write("input=" + os.path.join(out_dir, ifile) + "\n")
             file.write("output=" + out_dir + "/\n")
 
+=======
+
+    def create_call(self):
+        pipeline_id = self.generate_id()
+        FS = FileSystemStorage()
+        FS.location = os.path.join(MEDIA_ROOT, pipeline_id)
+        os.system("mkdir " + FS.location)
+        out_dir = FS.location
+        ifile = self.cleaned_data.get("ifile")
+        if ifile:
+            file_to_update = ifile
+            uploaded_file = str(file_to_update)
+            ifile = FS.save(uploaded_file, file_to_update)
+        elif self.cleaned_data.get("url"):
+            url = self.cleaned_data.get("url")
+            extension = os.path.basename(url).split('.')[-1]
+            dest = os.path.join(FS.location, os.path.basename(url))
+            ifile, headers = urllib.request.urlretrieve(url, filename=dest)
+        else:
+            raise Http404
+        listfile = "listFile.txt"
+        with open(os.path.join(out_dir, listfile), "w+") as file:
+            file.write(self.cleaned_data.get("faids"))
+        name = pipeline_id + '_h_fasubset'
+        config_location = os.path.join(out_dir, "conf.txt")
+        configuration = {
+            'pipeline_id': pipeline_id,
+            'out_dir': out_dir,
+            'name': name,
+            'conf_input': config_location,
+            'type': 'helper'
+        }
+        with open(config_location, "w+") as file:
+            file.write("mode=FASTASUB\n")
+            file.write("inputList=" + os.path.join(out_dir, listfile) + "\n")
+            file.write("inputFasta=" + os.path.join(out_dir, ifile) + "\n")
+            file.write("outBase=" + out_dir + "\n")
+
+>>>>>>> upstream/develop
         import json
         configuration_file_path = os.path.join(out_dir, 'conf.json')
         with open(configuration_file_path, 'w') as conf_file:

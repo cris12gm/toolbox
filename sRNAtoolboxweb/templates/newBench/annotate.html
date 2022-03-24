@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block header %}
+{% if running %}
+<meta http-equiv="refresh" content="{{ refresh_rate }}" >
+{% endif %}
+{% endblock %}
+
+{% block js %}
+{#    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>#}
+{#    <script src="{% static 'js/bootstrap.min.js' %}"></script>#}
+  {# JQUERY FILE UPLOAD SCRIPTS #}
+  <script src="{% static 'js/jquery-file-upload/vendor/jquery.ui.widget.js' %}"></script>
+  <script src="{% static 'js/jquery-file-upload/jquery.iframe-transport.js' %}"></script>
+  <script src="{% static 'js/jquery-file-upload/jquery.fileupload.js' %}"></script>
+
+  <script src="{% static 'vendors/datatables.net/js/jquery.dataTables.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-bs/js/dataTables.bootstrap.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-buttons/js/dataTables.buttons.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-buttons/js/buttons.flash.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-buttons/js/buttons.html5.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-buttons/js/buttons.print.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-keytable/js/dataTables.keyTable.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-responsive/js/dataTables.responsive.min.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js'%} "></script>
+  <script src="{% static 'vendors/datatables.net-scroller/js/dataTables.scroller.min.js'%} "></script>
+
+<script src="http://cdn.datatables.net/plug-ins/1.10.12/api/processing().js'%} "></script>
+
+{% endblock %}
+
+
+{% block content %}
+    <style>
+        .fa-clickable {
+        cursor:pointer;
+        outline:none;
+        }
+    </style>
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">{{ tool }}</h1>
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+        {% if error_message %}
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="alert alert-warning">
+                                {{ error_message }}
+                            </div>
+                        </div>
+                    </div>
+             {% endif %}
+
+        <div class="row">
+             <div class="row">
+            <div class="col-lg-4">
+        <a class="btn btn-default" href="{{ go_back_url }}"><i class="fa fa-arrow-left"></i>Back</a>
+            </div>
+             </div>
+            <div class="row">
+            <div class="col-lg-12">
+
+{##}
+{#                    <p class="text-success"> Your jobs will be launched soon. Links to your results will appear in <a href="{{settings.SUB_SITE}}/jobstatus/{{ id }}"> this page.</a></p>#}
+{#                    <p class="text-primary"> Your Job ID is: {{ id }}</p>#}
+{#                      <p class="text-warning">  Some analysis may take time, please be patient. You can bookmark <a href="{{settings.SUB_SITE}}/jobstatus/{{ id }}"> <i class="fa fa-bookmark fa-fw"></i> this page.</a></p>#}
+{##}
+
+            </div>
+            </div>
+
+
+
+
+
+
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                       <i class="fa fa-tasks fa-fw"></i> Uploaded files
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+
+                    <table id="gallery" class="table table-bordered" >
+                    <thead>
+                      <tr>
+                        <th>Uploaded Files</th> <th>Sample name</th> <th>Group</th>
+{#                          <th> Edit</th>#}
+{#                        <th>Uploaded Files</th> <th>Group</th> <th onclick="delInput('ALL');" class="text-danger fa-clickable"> Edit</th>#}
+                              </tr>
+                            </thead>
+                            <tbody>
+                            {% for orig, sample, name, group, k in all_samples %}
+{#                                <tr><td>{{ sample }}</td><td id="{{ sample }}_annot">{{ group }}</td> <td name="test-name-td" ><i id="id_{{ sample }}" name='edit::{{ sample }}_annot' class='fas fa-pen fa-clickable edit-annot' ></i></td> </tr>#}
+                                <tr><td>{{ sample }}</td><td>{{ name }}</td><td> <div id="annot_{{ k }}">{{ group }}</div>  </td></tr>
+{#                                    <div id="div_{{ k }}" style="display:none"><input class="annot-input" type="text" id="input_{{ k }}" ></div>  </td>#}
+{#                                    <td >#}
+{#                                    <div id="pen_{{ k }}"> <i id="edit::{{ k }}" class='fas fa-pen fa-clickable edit-annot' ></i></div>#}
+{#                                    <div id="div_save_{{ k }}" style="display:none"> <i id="save_{{ k }}" class='fas fa-check fa-clickable save-annot' ></i></div></td> </tr>#}
+
+                            {% endfor %}
+                            </tbody>
+                          </table>
+                    <form  method="post"  enctype="multipart/form-data">
+                            {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="custom-file" id="customFile">
+                        <label class="custom-file-label" for="exampleInputFile">
+                            Provide annotation file
+                        </label>
+                                <nobr><input style="display:inline;" type="file" class="custom-file-input" id="annotationInputFile" name="annotationInputFile" aria-describedby="fileHelp">
+
+                            <div style="display:inline;"
+                                class="buttonHolder"> <input type="submit" name="submit" value="Update annotation" disabled="disabled"
+                                    class="btn btn-primary btn btn-success"
+                                    id="submit-id-submit"/>
+
+                             </div>
+                                    </nobr>
+{#                            <button class="btn btn-primary" type="submit">Update annotation</button>#}
+                        </div>
+                        </div>
+                        <div class="col-lg-6">
+
+                            <label style="visibility: hidden;" class="custom-file-label" for="exampleInputFile">
+                            Provide annotation file
+                        </label>
+{#                            <input style="display:inline;visibility: hidden;" type="file" class="custom-file-input" id="annotationInputFile" name="annotationInputFile" aria-describedby="fileHelp">#}
+                            <div
+                                class="buttonHolder">
+                                       <a href="{% url 'multi:generate_template' %}?jobId={{ jobID }}"> <button type="button" class="btn btn-info pull-right">
+                                    <span class="fa fa-file-download"></span> Download template sheet</button></a>
+                             </div>
+                                    </nobr>
+{#                            <br>#}
+
+                        </div>
+                    </div>
+
+                        {#           data-url="{% url 'photos:progress_bar_upload' %}"#}
+{#                       data-form-data='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'>#}
+
+
+{#                        <button type="button" class="btn btn-success js-upload-photos">#}
+{#                        <span class="glyphicon glyphicon-cloud-upload"></span> Upload annotation</button>#}
+
+                                </form>
+
+
+                    </div>
+                    <!-- .panel-body -->
+                </div>
+
+            </div>
+
+
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /#page-wrapper -->
+
+{#<script>#}
+{#    var received_data = {{ tbody|safe }};#}
+{#    var received_cols = {{ thead|safe }};#}
+{##}
+{#    $(document).ready(function() {#}
+{##}
+{#    var table = $('#jobs').DataTable( {#}
+{##}
+{#//        'responsive': true,#}
+{#        data: received_data,#}
+{#//        processing: true,#}
+{#//        serverSide: true,#}
+{#//        deferRender: false,#}
+{#        'language':{#}
+{#       "loadingRecords": "&nbsp;",#}
+{#      "processing": "Loading..."#}
+{#    },#}
+{#        columns: received_cols,#}
+{#    } );#}
+{##}
+{# } );#}
+{##}
+{##}
+{##}
+{##}
+{##}
+{#</script>#}
+{##}
+
+
+    <script>
+    $(function () {
+
+    $(".js-upload-photos").click(function () {
+
+        $("#fileupload").click();
+    });
+
+    {# });#}
+
+    $("#fileupload").fileupload({
+        dataType: 'json',
+        sequentialUploads: true,
+    });
+
+ });</script>
+
+    <script>
+
+        $("#annotationInputFile").change(function () {
+
+            {#alert("change detected");#}
+            $("#submit-id-submit").prop('disabled', false);
+
+        });
+
+
+    </script>
+
+<script>
+    function toggleDiv(div_id) {
+        if  ($('#' + div_id).css('display') == "none"){
+                $('#' + div_id).css('display', 'inline-block');
+        }else{
+            $('#' + div_id).css('display', 'none');
+        }
+                    }
+
+    $(function () {
+
+        $(".edit-annot").click(function () {
+
+            {#alert(this.id);#}
+            var full_name = this.id;
+            sample_id = full_name.split("::")[1];
+            div_id = "div_" + sample_id ;
+            tag_id = "annot_" + sample_id ;
+            toggleDiv(div_id);
+            toggleDiv(tag_id);
+            toggleDiv("pen_" + sample_id);
+            toggleDiv("div_save_" + sample_id);
+
+            {#style="display:none"#}
+            {#alert(div_id)#}
+        })
+    });
+
+     $(function () {
+
+         $(".save-annot").click(function () {
+             var full_name = this.id;
+             sample_id = full_name.split("_")[1];
+             toggleDiv("div_" + sample_id);
+             toggleDiv("annot_" + sample_id);
+             toggleDiv("pen_" + sample_id);
+             toggleDiv("div_save_" + sample_id);
+         {#  here goes Ajax  #}
+         });
+     });
+
+    {#$(function () {#}
+    {##}
+    {#    $(".").click(function () {#}
+    {##}
+    {#    })#}
+    {# })#}
+
+</script>
+
+
+{% endblock %}
+
+

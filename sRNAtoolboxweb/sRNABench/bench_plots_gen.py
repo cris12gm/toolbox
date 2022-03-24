@@ -30,26 +30,7 @@ def Full_read_length_divs(input_folder, path_to_venv=None, plotly_script=None, m
                                    stderr=subprocess.PIPE)
         with open(os.path.join(input_folder, "stat", "test2.out"), "w") as test_f:
             test_f.write(" ".join(call_list))
-    #
-    # if False:
-    #     # os.system("touch " + os.path.join(input_folder, "stat", "2", "test.out"))
-    #     # os.mkdir(os.path.join(input_folder,"stat","2"))
-    #     #
-    #     call = " ".join([os.path.join(path_to_venv,"python"), BENCH_PLOTLY ,"readLength", input_folder])
-    #     with open(os.path.join(input_folder,"stat","test.out"), "w") as test_f:
-    #         test_f.write(call)
-    #     #os.system(" ".join([os.path.join(PATH_TO_VENV,"python"), BENCH_PLOTLY ,"readLength", input_folder]))
-    #     #subprocess.call('source ' +os.path.join(PATH_TO_VENV,"activate") + ';' + call , shell=True)
-    #     plotter = subprocess.Popen([os.path.join(PATH_TO_VENV,"python3.5"), BENCH_PLOTLY ,"readLength", input_folder],stdout=subprocess.PIPE,
-    #                                  stderr=subprocess.PIPE)
-    #     # [outStream, errStream] = plotter.communicate()
-    #     # with open(os.path.join(input_folder,"stat","err.out"), "w") as test_f:
-    #     #     test_f.write(str(outStream))
-    #     #     test_f.write(str(errStream))
-    #
-    #     # subprocess.Popen([os.path.join(PATH_TO_VENV,"python3"), BENCH_PLOTLY ,"readLength", input_folder])
-    #     # os.system("touch " + os.path.join(input_folder,"stat","2","test.out", "w"))
-    # elif not os.path.exists(out_path1) :
+
 
 
     input_table = pandas.read_table(length_file, sep='\t')
@@ -186,19 +167,52 @@ def Read_len_type(input_folder, path_to_venv=None, plotly_script=None, media_url
 
     print(input_table.shape[1])
     data = []
+    colors2 = ['rgb(31, 119, 180)', 'rgb(255, 127, 14)',
+                 'rgb(44, 160, 44)', 'rgb(214, 39, 40)',
+                 'rgb(148, 103, 189)', 'rgb(140, 86, 75)',
+                 'rgb(227, 119, 194)', 'rgb(127, 127, 127)',
+                 'rgb(188, 189, 34)', 'rgb(23, 190, 207)']
+
+    colors1 = ["#2E91E5",  "#E15F99",  "#1CA71C",  "#FB0D0D",  "#DA16FF",  "#222A2A",  "#B68100",  "#750D86",
+              "#EB663B",  "#511CFB",  "#00A08B",  "#FB00D1",  "#FC0080",  "#B2828D",  "#6C7C32",  "#778AAE",
+              "#862A16",  "#A777F1",  "#620042",  "#1616A7",  "#DA60CA",  "#6C4516",  "#0D2A63",  "#AF0038"]
+
+    colors = colors2 + colors1
+    colors = colors*4
+    color_index = 0
+    save_later = False
     for i in range(input_table.shape[1]-1):
         print(input_table.iloc[:,i+1].values)
         print(names[i + 1])
-
+        c_color = colors[i]
+        # do somethig with unassigned
+        c_name = names[i+1]
+        if c_name != "un-assigned":
+            trace = go.Bar(
+                x = lengths,
+                y = input_table.iloc[:,i+1].values,
+                name = c_name,
+                marker =dict(
+                    color = c_color,
+                    # colorscale="Dark24"
+                    # colorscale="Viridis"
+                )
+            )
+            data.append(trace)
+        else:
+            save_later = True
+            saved_y = input_table.iloc[:,i+1].values
+    if save_later:
         trace = go.Bar(
-            x = lengths,
-            y = input_table.iloc[:,i+1].values,
-            name = names[i+1],
-            marker =dict(
-                colorscale="Viridis"
+            x=lengths,
+            y=saved_y,
+            name="un-assigned",
+            marker=dict(
+                color="#C0C0C0",
             )
         )
         data.append(trace)
+
 
     layout = go.Layout(
         margin=go.layout.Margin(
@@ -265,9 +279,14 @@ def Mapping_stat_plot(input_folder, path_to_venv=None, plotly_script=None, media
     input_table = pandas.read_table(length_file, sep='\t')
     x = input_table["name"].values
     y = input_table["RCperc"].values
+    maxi = len(y)
+    for i,n in enumerate(y):
+        if float(n) < 0.5:
+            maxi = i
+            break
     trace = go.Bar(
-        x=x,
-        y=y,
+        x=x[0:maxi],
+        y=y[0:maxi],
         marker=dict(
             color=['rgb(31, 119, 180)', 'rgb(255, 127, 14)',
                          'rgb(44, 160, 44)', 'rgb(214, 39, 40)',
@@ -348,7 +367,8 @@ def top_miRs_plot(input_file, title=".", path_to_venv=None, plotly_script=None, 
         y=y,
         marker=dict(
             color=['rgb(31, 119, 180)']*len(x),
-            colorscale="Viridis"
+            colorscale="Dark24"
+            # colorscale="Viridis"
         ))
     data = [trace]
     layout = go.Layout(
