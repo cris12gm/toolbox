@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'multi',
     'miRNAgFree',
     'sRNAcons',
+    'content'
 ]
 
 MIDDLEWARE = [

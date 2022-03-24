@@ -11,8 +11,8 @@ class sRNAconsParser(Parser):
         self.limit = limit
 
     def parse(self):
+        
         fd = open(self.ipath)
-        header = fd.readline()
 
         for i, line in enumerate(fd):
             aline = line.replace("\n", "").split("\t")

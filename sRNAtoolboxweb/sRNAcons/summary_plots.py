@@ -6,10 +6,7 @@ import itertools
 from plotly.offline import plot
 import plotly.graph_objs as go
 import pandas
-import os.path
 import plotly.plotly as py
-import plotly.graph_objs as go
-import plotly
 import numpy as np
 
 def makeSpeciesPlot(input_file):

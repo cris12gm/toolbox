@@ -17,6 +17,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.conf import settings
 from FileModels.sRNAconsParsers import sRNAconsParser
 from .summary_plots import makesrnasPlot,makeSpeciesPlot
+from django.http import JsonResponse
 
 #SPECIES_PATH = '/shared/data/sRNAbench/species.csv'
 #SPECIES_ANNOTATION_PATH = '/shared/data/sRNAbench/annotation.txt'
@@ -33,11 +34,11 @@ class TableResult(tables.Table):
     """
 
     class Meta:
-        orderable = False
+        orderable = True
         attrs = {'class': 'table table-striped table-bordered table-hover dataTable no-footer',
                  "id": lambda: "table_%d" % next(counter)}
         empty_text = "Results not found!"
-        order_by = ("frequency",)
+        order_by = ("percentage")
 
 
 def define_table(columns, typeTable):
@@ -46,6 +47,7 @@ def define_table(columns, typeTable):
     :return: a class of type TableResults
     """
     attrs = dict((c, tables.Column()) for c in columns)
+
     if typeTable == "TableResult":
         attrs['Meta'] = type('Meta', (),
                              dict(attrs={'class': 'table table-striped table-bordered table-hover dataTable no-footer',
@@ -62,9 +64,22 @@ def define_table(columns, typeTable):
                                   order_by=("frequency",)))
 
 
-
     klass = type('TableResult', (tables.Table,), attrs)
     return klass
+
+def querySpecies(request):
+    specieID = request.GET.get('name', None).replace("buttonSpecies","")
+    print(specieID)
+ #       values = request.GET.get('values',None).replace("[","").replace("]","").split(",")
+ #       table = ""
+
+ #       for element in values:
+ #           table = table+"<tr><td class='rowTable'>"+element+"</td></tr>"
+    
+    dataGen = {}
+    dataGen["speciesID"]=specieID
+#        dataGen["tableContent"]=""
+    return JsonResponse(dataGen)
 
 
 class Result():
@@ -113,6 +128,25 @@ def result(request):
                     header = srna2sp[0].get_sorted_attr()
                     blast_result = Result("Conservation per sRNA", define_table(header, 'TableResult')(srna2sp))
                     results["srna2sp"] = blast_result
+
+                    fileTable = open(os.path.join(new_record.outdir, "sRNA2Species.txt"),'r')
+                    tableSRNA = {}
+                    fileTable.readline()
+                    header = ["Name","Percentage","Frequency","Species"]
+                    tableSRNA['header'] = header
+                    tableSRNA['content'] = []
+                    for element in fileTable:
+                        element = element.split("\t")
+                        new = []
+                        for sp in element[3].split(","):
+                            sp = sp.split(";")[0]
+                            new.append(sp)
+                        element[3] = new
+                        
+                        tableSRNA['content'].append(element)
+
+                    results["tableSRNA"] = tableSRNA
+
                 except:
                     pass
 
@@ -136,6 +170,17 @@ def result(request):
                     results["graphicSum_2"] = graphicSum_2
                 except:
                     pass
+
+                try:
+                    cmd = "zip -j -r "+os.path.join(new_record.outdir,"results.zip")+" "+os.path.join(new_record.outdir,"sRNA2Species.txt")+" "+os.path.join(new_record.outdir,"species2SRNA.txt")
+                    os.system(cmd)
+                    results["downloadAll"] =  (os.path.join(new_record.outdir,"results.zip")).replace(settings.MEDIA_ROOT,settings.MEDIA_URL)
+                    results["downloadsRNA"] = (os.path.join(new_record.outdir,"sRNA2Species.txt")).replace(settings.MEDIA_ROOT,settings.MEDIA_URL)
+                    results["downloadspecies"] = (os.path.join(new_record.outdir,"species2SRNA.txt")).replace(settings.MEDIA_ROOT,settings.MEDIA_URL)
+                except:
+                    results["downloadAll"]=""
+                    results["downloadsRNA"] = ""
+                    results["downloadspecies"] = ""
             else:
                 results["error"] = "Some errors were detected, please email with the number of this jobID ("+job_id+") to the administrator of the website."
             return render(request, 'sRNAcons/srnacons_result.html', results)
