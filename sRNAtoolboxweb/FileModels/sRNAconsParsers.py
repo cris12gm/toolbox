@@ -4,20 +4,14 @@ from FileModels.Parser import Parser
 
 
 class sRNAconsParser(Parser):
-    #def __init__(self, ipath, file_type, limit=1):
     def __init__(self, ipath, file_type, limit=None):
         super(sRNAconsParser, self).__init__(ipath)
         self.file_type = file_type
         self.limit = limit
 
     def parse(self):
-<<<<<<< HEAD
-        
-        fd = open(self.ipath)
-=======
         fd = open(self.ipath)
         header = fd.readline()
->>>>>>> upstream/develop
 
         for i, line in enumerate(fd):
             aline = line.replace("\n", "").split("\t")

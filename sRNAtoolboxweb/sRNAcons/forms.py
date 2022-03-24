@@ -3,11 +3,7 @@ import json
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Field, ButtonHolder, Submit, HTML
-<<<<<<< HEAD
 from crispy_forms.bootstrap import InlineRadios, TabHolder, Tab, Accordion,AccordionGroup
-=======
-from crispy_forms.bootstrap import InlineRadios, TabHolder, Tab, Accordion, AccordionGroup
->>>>>>> upstream/develop
 from django import forms
 from django.core.files.storage import FileSystemStorage
 from django.http import Http404
@@ -27,7 +23,6 @@ from sRNAtoolboxweb.utils import create_collapsable_div, render_modal
 
 class sRNAconsForm(forms.Form):
     KINGDOMS = (
-<<<<<<< HEAD
         ("animal","Animal"),
         ("plant","Plant")
 
@@ -37,23 +32,11 @@ class sRNAconsForm(forms.Form):
     mistmatches = forms.IntegerField(label="Number of mistmatches", required=True, initial=1,min_value=0)
     kingdom=forms.ChoiceField(label= 'Kingdom', choices=KINGDOMS, required=False)
 
-=======
-        ("animal", "Animal"),
-        ("plant", "Plant")
-
-    )
-    ifile = forms.FileField(label='Upload input file(Fasta file)', required=False)
-    url = forms.URLField(label='URL/link', required=False)
-    mistmatches = forms.IntegerField(label="Number of mistmatches", required=True, initial=1, min_value=0, max_value=2)
-    kingdom = forms.ChoiceField(label='Kingdom', choices=KINGDOMS, required=False)
->>>>>>> upstream/develop
-
     def __init__(self, *args, **kwargs):
         self.folder = kwargs.pop('dest_folder', None)
         super(sRNAconsForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
-<<<<<<< HEAD
         create_collapsable_div(
             TabHolder(
                 Tab('Upload',
@@ -65,19 +48,6 @@ class sRNAconsForm(forms.Form):
                     Field('url', css_class='form-control'),
                     )
             ),
-=======
-            create_collapsable_div(
-                TabHolder(
-                    Tab('Upload',
-                        HTML("""<br>"""),
-                        Field('ifile', css_class='form-control'),
-                        ),
-                    Tab('URL/link',
-                        HTML("""<br>"""),
-                        Field('url', css_class='form-control'),
-                        )
-                ),
->>>>>>> upstream/develop
                 title='Choose your input',
                 c_id='100',
                 extra_title=render_modal('Choose_Input'),
@@ -101,22 +71,13 @@ class sRNAconsForm(forms.Form):
         if not cleaned_data.get('ifile') and not cleaned_data.get('url'):
             self.add_error('ifile', 'One of these two fields is required (file or url)')
             self.add_error('url', 'One of these two fields is required (file or url)')
-<<<<<<< HEAD
         if not cleaned_data.get('mistmatches') and cleaned_data.get('mistmatches')!=0:
-=======
-        if not cleaned_data.get('mistmatches') and cleaned_data.get('mistmatches') != 0:
->>>>>>> upstream/develop
             self.add_error('mistmatches', 'This field is required and should be equal to 0 or more')
         if cleaned_data.get('ifile') and cleaned_data.get('url'):
             self.add_error('ifile', 'Choose either file or URL')
             self.add_error('url', 'Choose either file or URL')
         return cleaned_data
-<<<<<<< HEAD
-    
-    
-=======
 
->>>>>>> upstream/develop
     def generate_id(self):
         is_new = True
         while is_new:
@@ -124,10 +85,6 @@ class sRNAconsForm(forms.Form):
             if not JobStatus.objects.filter(pipeline_key=pipeline_id):
                 return pipeline_id
 
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/develop
     def create_call(self):
         pipeline_id = self.generate_id()
         FS = FileSystemStorage()
@@ -149,11 +106,7 @@ class sRNAconsForm(forms.Form):
             try:
                 ifile, headers = urllib.request.urlretrieve(url, filename=dest)
             except:
-<<<<<<< HEAD
-                os.system("wget --no-check-certificate "+url+" -O "+dest)
-=======
                 os.system("wget --no-check-certificate " + url + " -O " + dest)
->>>>>>> upstream/develop
                 ifile = dest
         else:
             raise Http404
@@ -164,19 +117,11 @@ class sRNAconsForm(forms.Form):
         conf_params["web"] = "true"
         conf_params["input"] = MEDIA_ROOT
         conf_params['pipeline_id'] = pipeline_id
-<<<<<<< HEAD
         conf_params['out_dir'] = os.path.join(MEDIA_ROOT,pipeline_id)
         conf_params['output'] = os.path.join(MEDIA_ROOT,pipeline_id)
         conf_params['name'] = pipeline_id + "_sRNAcons"
         conf_params['type'] = "sRNAcons"
         conf_params['conf_input'] = os.path.join(MEDIA_ROOT,pipeline_id,"conf.txt")
-=======
-        conf_params['out_dir'] = os.path.join(MEDIA_ROOT, pipeline_id)
-        conf_params['output'] = os.path.join(MEDIA_ROOT, pipeline_id)
-        conf_params['name'] = pipeline_id + "_sRNAcons"
-        conf_params['type'] = "sRNAcons"
-        conf_params['conf_input'] = os.path.join(MEDIA_ROOT, pipeline_id, "conf.txt")
->>>>>>> upstream/develop
 
         with open(config_location, "w+") as file:
             file.write("input=" + os.path.join(out_dir, ifile) + "\n")

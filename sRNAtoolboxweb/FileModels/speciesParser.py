@@ -16,4 +16,4 @@ class SpeciesParser(Parser):
             species_array.append(new_species)
         fd.close()
 
-        return species_array
+        return 

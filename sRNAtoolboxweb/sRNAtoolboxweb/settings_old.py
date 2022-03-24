@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+DEBUG=True
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from django.core.files.storage import FileSystemStorage
 
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     'dajax',
     'multi',
     'miRNAgFree',
+    'sRNAcons',
     'content'
 ]
 
@@ -183,7 +185,7 @@ STATICFILES_DIRS = [
 
 ]
 
-STATIC_ROOT= "/var/www/html/sRNAtoolbox_static/"
+# STATIC_ROOT= "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxweb/sRNAtoolboxweb/static"
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
@@ -200,16 +202,17 @@ CONF = {
     "seqObj": "/srv/shared/sRNAtoolboxDB/seqOBJ",
     "annotationPath": "/shared/sRNAtoolboxDB/jBrowserAnnot",
     "species": "/opt/sRNAtoolboxDB/species.txt",
+    #"species": "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxDB/species.txt",
     #"speciesAnnotation": "/home/aruedamartin/annotation.txt",
     "mirDbPath" : "/opt/sRNAtoolboxDB/mirdb.tsv",
     "MirGeneDB_data" : "/opt/sRNAtoolboxDB/miRGeneDB.tsv",
     "speciesAnnotation": "/opt/sRNAtoolboxDB/annotation.txt",
-    "targetAnnotation": "/opt/sRNAtoolboxDB/targetAnnot.txt",
-    "db": "/opt/sRNAtoolboxDB",
+    "targetAnnotation": "/shared/sRNAtoolboxDB/targetAnnot.txt",
+    "db": "/Users/ernesto/PycharmProjects/arn_toolbox/sRNAtoolboxDB",
     "exec": "/opt/sRNAtoolboxDB/exec",
-    "RNAcentral": "/opt/sRNAtoolboxDB/dbs/rnacentral_active.fasta",
-    "tRNA": "/opt/sRNAtoolboxDB/dbs/eukaryotic-tRNAs.fa",
-    "tax": "/opt/sRNAtoolboxDB/dbs/taxonomy.txt"
+    "RNAcentral": "/shared/sRNAtoolboxDB/dbs/rnacentral_active.fasta",
+    "tRNA": "/shared/sRNAtoolboxDB/dbs/eukaryotic-tRNAs.fa",
+    "tax": "/shared/sRNAtoolboxDB/dbs/taxonomy.txt"
 }
 
 QSUB = True
@@ -224,38 +227,3 @@ SETTINGS_EXPORT = [
 
 BENCH_PLOTLY = "/opt/sRNAtoolbox_prod/sRNAtoolboxweb/sRNABench/bench_plots_gen.py"
 PATH_TO_VENV = "/opt/venv/sRNAtoolbox2019/bin/"
-
-MATRIX_GENERATOR_DICT = {"Read Length":
-                             {"file":   [
-                                        [ "microRNA_sense.readLen", "microRNA", ],
-                                        [ "mRNA(sense).readLen", "mRNA - sense", ],
-                                        [ "otherRNAs.readLen", "other RNA",],
-                                        [ "snRNA.readLen", "snRNA", ],
-                                        [ "mRNA(antisense).readLen", "mRNA - antisense", ],
-                                        [ "rRNA.readLen", "rRNA", ],
-                                        [ "tRNA.readLen", "tRNA" ],
-
-                                       ],
-
-
-                              "column": [
-                                        [ "4", "Read Count Percentage", ],
-                                        [ "5", "RPM"],
-                                            ],
-
-                              "fixedParam": " diffExpr=false stat=true minRCdata=0 folderData=readLength ",
-                              }
-
-                         }
-
-MIRNA_DBS = {
-                "MirGeneDB 2.1": os.path.join("/opt/sRNAtoolboxDB/miRdb", "MirGeneDB2_1_Species_TaxonID.txt" ) ,
-                "miRBase release 22.1": os.path.join("/opt/sRNAtoolboxDB/miRdb","miRBase22_1_Species_TaxonID.txt"),
-                "PmiREN2.0": os.path.join("/opt/sRNAtoolboxDB/miRdb", "PmiREN2_0_Species_TaxonID.txt"),
-             }
-
-                                    
-
-
-
-

@@ -16,8 +16,4 @@ urlpatterns = [
     #url(r'^run/([A-za-z]+)', views.run),
     url(r'^results', views.result),
 
-<<<<<<< HEAD
 ]
-=======
-]
->>>>>>> upstream/develop
