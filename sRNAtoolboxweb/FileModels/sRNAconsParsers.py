@@ -4,6 +4,7 @@ from FileModels.Parser import Parser
 
 
 class sRNAconsParser(Parser):
+    #def __init__(self, ipath, file_type, limit=1):
     def __init__(self, ipath, file_type, limit=None):
         super(sRNAconsParser, self).__init__(ipath)
         self.file_type = file_type
@@ -26,7 +27,6 @@ class sRNAconsParser(Parser):
 
             else:
                 break
-
 
 
 

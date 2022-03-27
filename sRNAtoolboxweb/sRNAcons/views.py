@@ -19,9 +19,6 @@ from FileModels.sRNAconsParsers import sRNAconsParser
 from .summary_plots import makesrnasPlot,makeSpeciesPlot
 from django.http import JsonResponse
 
-#SPECIES_PATH = '/shared/data/sRNAbench/species.csv'
-#SPECIES_ANNOTATION_PATH = '/shared/data/sRNAbench/annotation.txt'
-#FS = FileSystemStorage("/shared/sRNAtoolbox/webData")
 CONF = settings.CONF
 FS = FileSystemStorage(CONF["sRNAtoolboxSODataPath"])
 
@@ -68,18 +65,34 @@ def define_table(columns, typeTable):
     return klass
 
 def querySpecies(request):
-    specieID = request.GET.get('name', None).replace("buttonSpecies","")
-    print(specieID)
- #       values = request.GET.get('values',None).replace("[","").replace("]","").split(",")
- #       table = ""
+    if 'id' in request.GET and 'element' in request.GET:
+        job_id = request.GET['id']
+        selected = request.GET['element']
 
- #       for element in values:
- #           table = table+"<tr><td class='rowTable'>"+element+"</td></tr>"
-    
-    dataGen = {}
-    dataGen["speciesID"]=specieID
-#        dataGen["tableContent"]=""
-    return JsonResponse(dataGen)
+        new_record = JobStatus.objects.get(pipeline_key=job_id)
+        fileTable = open(os.path.join(new_record.outdir, "sRNA2Species.txt"),'r')
+        fileTable.readline()
+        tableSRNA = {}
+        tableSRNA['header'] = ["Species"]
+        tableSRNA['content'] = []
+
+        for element in fileTable:
+            element = element.strip().split("\t")
+            if element[0] == selected:
+                tableSRNA['name'] = selected
+                tableSRNA['percentage'] = element[1]
+                tableSRNA['frequency'] = element[2]
+                for sp in element[3].split(","):
+                    sp = sp.split(";")
+                    tableSRNA['content'].append(sp[0])
+
+        results = {}
+        results['tableSRNA'] = tableSRNA
+        results['id'] = job_id
+        return render(request, 'sRNAcons/srnacons_showmore.html', results)
+    else:
+        return redirect(settings.SUB_SITE)
+
 
 
 class Result():
@@ -123,11 +136,6 @@ def result(request):
 
             if os.path.exists(os.path.join(new_record.outdir,"identicalSequenceRelation.tsv")):
                 try:
-                    parser = sRNAconsParser(os.path.join(new_record.outdir, "sRNA2Species.txt"), "srna2species", 1000)
-                    srna2sp = [obj for obj in parser.parse()]
-                    header = srna2sp[0].get_sorted_attr()
-                    blast_result = Result("Conservation per sRNA", define_table(header, 'TableResult')(srna2sp))
-                    results["srna2sp"] = blast_result
                     fileTable = open(os.path.join(new_record.outdir, "sRNA2Species.txt"),'r')
                     tableSRNA = {}
                     fileTable.readline()
@@ -144,19 +152,16 @@ def result(request):
                         
                         tableSRNA['content'].append(element)
 
-                    results["tableSRNA"] = tableSRNA
+                    results["srna2sp"] = tableSRNA
 
                 except:
                     pass
-
-                try:            
-                    parser = sRNAconsParser(os.path.join(new_record.outdir, "species2SRNA.txt"), "species2srna", 1000)
-                    srna2sp = [obj for obj in parser.parse()]
-                    header = srna2sp[0].get_sorted_attr()
-                    blast_result = Result("sRNAs per species", define_table(header, 'TableResult')(srna2sp))
-                    results["sp2srna"] = blast_result
-                except:
-                    pass
+     
+                parser = sRNAconsParser(os.path.join(new_record.outdir, "species2SRNA.txt"), "species2srna", 1000)
+                srna2sp = [obj for obj in parser.parse()]
+                header = srna2sp[0].get_sorted_attr()
+                blast_result = Result("sRNAs per species", define_table(header, 'TableResult')(srna2sp))
+                results["sp2srna"] = blast_result
 
                 try:
                     graphicSum = makesrnasPlot(os.path.join(new_record.outdir, "sRNA2Species.txt"))
