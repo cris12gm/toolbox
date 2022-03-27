@@ -69,27 +69,30 @@ def querySpecies(request):
         job_id = request.GET['id']
         selected = request.GET['element']
 
-        new_record = JobStatus.objects.get(pipeline_key=job_id)
-        fileTable = open(os.path.join(new_record.outdir, "sRNA2Species.txt"),'r')
-        fileTable.readline()
-        tableSRNA = {}
-        tableSRNA['header'] = ["Species"]
-        tableSRNA['content'] = []
+        try:
+            new_record = JobStatus.objects.get(pipeline_key=job_id)
+            fileTable = open(os.path.join(new_record.outdir, "sRNA2Species.txt"),'r')
+            fileTable.readline()
+            tableSRNA = {}
+            tableSRNA['header'] = ["Species"]
+            tableSRNA['content'] = []
 
-        for element in fileTable:
-            element = element.strip().split("\t")
-            if element[0] == selected:
-                tableSRNA['name'] = selected
-                tableSRNA['percentage'] = element[1]
-                tableSRNA['frequency'] = element[2]
-                for sp in element[3].split(","):
-                    sp = sp.split(";")
-                    tableSRNA['content'].append(sp[0])
+            for element in fileTable:
+                element = element.strip().split("\t")
+                if element[0] == selected:
+                    tableSRNA['name'] = selected
+                    tableSRNA['percentage'] = element[1]
+                    tableSRNA['frequency'] = element[2]
+                    for sp in element[3].split(","):
+                        sp = sp.split(";")
+                        tableSRNA['content'].append(sp[0])
 
-        results = {}
-        results['tableSRNA'] = tableSRNA
-        results['id'] = job_id
-        return render(request, 'sRNAcons/srnacons_showmore.html', results)
+            results = {}
+            results['tableSRNA'] = tableSRNA
+            results['id'] = job_id
+            return render(request, 'sRNAcons/srnacons_showmore.html', results)
+        except:
+            return redirect(settings.SUB_SITE)
     else:
         return redirect(settings.SUB_SITE)
 
